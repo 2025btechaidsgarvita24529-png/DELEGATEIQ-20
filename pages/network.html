@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Network — DelegateIQ</title>
+  <link rel="stylesheet" href="../css/style.css"/>
+<style>
+  /* Auth Guard Overlay */
+  #authGuard {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100vw; height: 100vh;
+    background: #FAF7F2;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: 16px;
+    z-index: 99999;
+  }
+  #authGuard .ag-logo {
+    width: 56px; height: 56px;
+    background: #D97706;
+    border-radius: 14px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 28px; font-weight: 900; color: white;
+    font-family: 'Trebuchet MS', sans-serif;
+    animation: agPulse 1.5s ease-in-out infinite;
+  }
+  #authGuard p {
+    font-size: 14px; font-weight: 600;
+    color: #8B7355;
+    font-family: 'Nunito', sans-serif;
+  }
+  @keyframes agPulse {
+    0%, 100% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(0.95); opacity: 0.8; }
+  }
+</style>
+</head>
+<body class="app-page">
+  <!-- AUTH GUARD -->
+  <style id="authGuardStyle">
+    body.app-page .main-content, body.app-page aside.sidebar { visibility:hidden !important; }
+    #authLoadingScreen { position:fixed;top:0;left:0;width:100%;height:100%;background:#FAF7F2;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:9999; }
+    .auth-spinner { width:44px;height:44px;border:3px solid #E8DFD0;border-top-color:#D97706;border-radius:50%;animation:authspin 0.8s linear infinite;margin-bottom:16px; }
+    @keyframes authspin { to { transform:rotate(360deg); } }
+    .auth-logo-txt { font-size:28px;font-weight:900;color:#1A1008;font-family:Trebuchet MS; }
+    .auth-sub-txt { font-size:13px;color:#8B7355;font-weight:600;margin-top:6px; }
+  </style>
+  <div id="authLoadingScreen">
+    <div class="auth-spinner"></div>
+    <div class="auth-logo-txt">DelegateIQ</div>
+    <div class="auth-sub-txt">Verifying your session...</div>
+  </div>
+  <!-- Auth Guard Overlay - hidden after auth check -->
+  <div id="authGuard">
+    <div class="ag-logo">D</div>
+    <p>Verifying your session...</p>
+  </div>
+
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-logo"><div class="logo-mark">D</div><span class="logo-text">DelegateIQ</span></div>
+    <nav class="sidebar-nav">
+      <div class="nav-section-label">Main</div>
+      <a href="dashboard.html" class="nav-item"><span class="nav-icon">🏠</span><span>Dashboard</span></a>
+      <a href="ai-chat.html" class="nav-item"><span class="nav-icon">🤖</span><span>AI Assistant</span></a>
+      <a href="research.html" class="nav-item"><span class="nav-icon">🔍</span><span>Research</span></a>
+      <a href="resolutions.html" class="nav-item"><span class="nav-icon">📜</span><span>Resolutions</span></a>
+      <div class="nav-section-label">Community</div>
+      <a href="network.html" class="nav-item active"><span class="nav-icon">👥</span><span>Network</span></a>
+      <a href="chats.html" class="nav-item"><span class="nav-icon">💬</span><span>Chats</span></a>
+      <div class="nav-section-label">You</div>
+      <a href="profile.html" class="nav-item"><span class="nav-icon">👤</span><span>Profile</span></a>
+      <a href="profile.html" class="nav-item"><span class="nav-icon">🏅</span><span>Badges</span></a>
+    </nav>
+    <div class="sidebar-bottom">
+      <div class="sidebar-user" onclick="location.href='profile.html'">
+        <div class="avatar-btn" id="sidebarAvatar">?</div>
+        <div><div class="sidebar-user-name" id="sidebarName">Loading...</div><div class="sidebar-user-role">Member</div></div>
+      </div>
+      <a href="#" class="nav-item" id="logoutBtn"><span class="nav-icon">🚪</span><span>Logout</span></a>
+    </div>
+  </aside>
+
+  <main class="main-content">
+    <header class="app-header">
+      <button class="sidebar-toggle" onclick="document.getElementById('sidebar').classList.toggle('open')">☰</button>
+      <h2>👥 Delegate Network</h2>
+      <div class="header-right">
+        <div class="avatar-btn" id="headerAvatar">?</div>
+      </div>
+    </header>
+
+    <div style="padding:24px;">
+      <!-- Search bar -->
+      <div style="background:white;border:1.5px solid var(--border);border-radius:var(--r-xl);padding:20px;margin-bottom:20px;">
+        <div style="display:flex;gap:10px;align-items:center;">
+          <input type="text" id="searchDelegates" placeholder="Search delegates by name, school, or committee..." style="flex:1;padding:10px 14px;background:var(--bg-soft);border:1.5px solid var(--border);border-radius:var(--r-full);font-size:14px;color:var(--text-primary);font-family:'Nunito',sans-serif;outline:none;" oninput="filterDelegates(this.value)"/>
+          <select id="filterCommittee" onchange="filterDelegates(document.getElementById('searchDelegates').value)" style="padding:10px 14px;background:var(--bg-soft);border:1.5px solid var(--border);border-radius:var(--r-full);font-size:13px;font-family:'Nunito',sans-serif;outline:none;color:var(--text-secondary);">
+            <option value="">All Committees</option>
+            <option>UNSC</option><option>UNGA</option><option>WHO</option><option>HRC</option><option>UNHRC</option><option>UNODC</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Stats bar -->
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:24px;">
+        <div class="dash-card" style="text-align:center;padding:16px;">
+          <div style="font-size:24px;font-weight:900;color:var(--amber);font-family:'Nunito',sans-serif;">247</div>
+          <div style="font-size:11px;color:var(--text-muted);font-weight:700;text-transform:uppercase;letter-spacing:0.5px;">Delegates Online</div>
+        </div>
+        <div class="dash-card" style="text-align:center;padding:16px;">
+          <div style="font-size:24px;font-weight:900;color:var(--amber);font-family:'Nunito',sans-serif;">38</div>
+          <div style="font-size:11px;color:var(--text-muted);font-weight:700;text-transform:uppercase;letter-spacing:0.5px;">Active Committees</div>
+        </div>
+        <div class="dash-card" style="text-align:center;padding:16px;">
+          <div style="font-size:24px;font-weight:900;color:var(--amber);font-family:'Nunito',sans-serif;">12</div>
+          <div style="font-size:11px;color:var(--text-muted);font-weight:700;text-transform:uppercase;letter-spacing:0.5px;">Upcoming MUNs</div>
+        </div>
+      </div>
+
+      <!-- Delegates grid -->
+      <h3 style="font-size:16px;font-weight:800;margin-bottom:14px;color:var(--text-primary);">Delegates in Your Committee</h3>
+      <div id="delegatesGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px;"></div>
+    </div>
+  </main>
+
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+  <script>
+    const fc = {apiKey:"AIzaSyCqNmnpQRg5uUYu4Pp_k0k90wNBmJxpuH0",authDomain:"delegate-iq-2025.firebaseapp.com",projectId:"delegate-iq-2025",storageBucket:"delegate-iq-2025.firebasestorage.app",messagingSenderId:"612696020579",appId:"1:612696020579:web:90255861a0d531f2580a56"};
+    if(!firebase.apps.length) firebase.initializeApp(fc);
+    // Load sidebar INSTANTLY from localStorage — no waiting
+    (function(){
+      var p={};try{p=JSON.parse(localStorage.getItem('diq_profile')||'{}');}catch(e){}
+      if(p.displayName){
+        var i=p.initials||p.displayName.substring(0,2).toUpperCase();
+        var a=document.getElementById('sidebarAvatar');
+        var n=document.getElementById('sidebarName');
+        var s=document.getElementById('sidebarSchool');
+        var h=document.getElementById('headerAvatar');
+        if(a) a.textContent=i;
+        if(n) n.textContent=p.displayName;
+        if(s) s.textContent=p.school||'Member';
+        if(h) h.textContent=i;
+      }
+    })();
+    
+    function authReady() {
+      var s = document.getElementById('authLoadingScreen');
+      var g = document.getElementById('authGuardStyle');
+      if(s) s.style.display='none';
+      if(g) g.textContent='';
+    }
+    firebase.auth().onAuthStateChanged(user => {
+      if(!user){ window.location.replace('login.html'); return; }
+      var guard=document.getElementById('authGuard');
+      if(guard){ guard.style.opacity='0'; guard.style.transition='opacity 0.3s'; setTimeout(function(){guard.style.display='none';},300); }
+      let p={};try{p=JSON.parse(localStorage.getItem('diq_profile')||'{}');}catch(e){}
+      let s={};try{s=JSON.parse(localStorage.getItem('diq_setup')||'{}');}catch(e){}
+      const name=p.displayName||user.displayName||user.email.split('@')[0];
+      const initials=p.initials||name.substring(0,2).toUpperCase();
+      document.getElementById('sidebarName').textContent=name;
+      document.getElementById('sidebarAvatar').textContent=initials;
+      document.getElementById('headerAvatar').textContent=initials;
+      renderDelegates(s.committee||'UNSC');
+    });
+
+    const delegates = [
+      {name:'Aryan Sharma',school:'DPS Delhi',committee:'UNSC',country:'France',badge:'🏆 Best Del'},
+      {name:'Priya Mehta',school:'Ryan International',committee:'UNSC',country:'Russia',badge:'⭐ Seasoned'},
+      {name:'Rohan Verma',school:'Amity School',committee:'UNGA',country:'USA',badge:'🔍 Researcher'},
+      {name:'Simran Kaur',school:'St. Columba\'s',committee:'WHO',country:'India',badge:'🏛️ Delegate'},
+      {name:'Dev Patel',school:'Modern School',committee:'HRC',country:'Germany',badge:'📜 Drafter'},
+      {name:'Ananya Joshi',school:'DPS RK Puram',committee:'UNSC',country:'China',badge:'🎓 Scholar'},
+      {name:'Kabir Singh',school:'Heritage School',committee:'UNODC',country:'Canada',badge:'🏅 Active'},
+      {name:'Riya Gupta',school:'The Shri Ram School',committee:'UNHRC',country:'UK',badge:'⭐ Seasoned'},
+    ];
+
+    window.allDelegates = delegates;
+
+    function renderDelegates(userCommittee) {
+      const grid = document.getElementById('delegatesGrid');
+      const shown = delegates.filter(d => !userCommittee || d.committee === userCommittee || Math.random() > 0.3);
+      grid.innerHTML = shown.map(d => `
+        <div style="background:white;border:1.5px solid var(--border);border-radius:var(--r-lg);padding:18px;transition:all 0.2s;" onmouseover="this.style.borderColor='var(--amber)';this.style.transform='translateY(-2px)'" onmouseout="this.style.borderColor='var(--border)';this.style.transform='translateY(0)'">
+          <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;">
+            <div style="width:42px;height:42px;background:var(--grad-warm);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:900;color:white;flex-shrink:0;">${d.name.split(' ').map(n=>n[0]).join('').substring(0,2)}</div>
+            <div>
+              <div style="font-size:14px;font-weight:800;color:var(--text-primary);">${d.name}</div>
+              <div style="font-size:11px;color:var(--text-muted);font-weight:600;">📚 ${d.school}</div>
+            </div>
+          </div>
+          <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px;">
+            <span style="background:var(--amber-pale);color:var(--amber);font-size:10px;font-weight:700;padding:3px 8px;border-radius:100px;border:1px solid var(--amber-soft);">🏛️ ${d.committee}</span>
+            <span style="background:var(--bg-soft);color:var(--text-secondary);font-size:10px;font-weight:700;padding:3px 8px;border-radius:100px;border:1px solid var(--border);">🌍 ${d.country}</span>
+            <span style="background:var(--sage-pale);color:var(--sage);font-size:10px;font-weight:700;padding:3px 8px;border-radius:100px;">${d.badge}</span>
+          </div>
+          <button onclick="connectDelegate('${d.name}')" style="width:100%;padding:8px;background:var(--grad-warm);color:white;border:none;border-radius:var(--r-full);font-size:12px;font-weight:700;cursor:pointer;font-family:'Nunito',sans-serif;">Connect →</button>
+        </div>`).join('');
+    }
+
+    window.filterDelegates = function(query) {
+      const committee = document.getElementById('filterCommittee').value;
+      const q = query.toLowerCase();
+      const filtered = delegates.filter(d =>
+        (!committee || d.committee === committee) &&
+        (!q || d.name.toLowerCase().includes(q) || d.school.toLowerCase().includes(q) || d.committee.toLowerCase().includes(q))
+      );
+      const grid = document.getElementById('delegatesGrid');
+      if(!filtered.length) { grid.innerHTML = '<div style="color:var(--text-muted);padding:20px;font-weight:600;">No delegates found.</div>'; return; }
+      renderFilteredDelegates(filtered);
+    };
+
+    function renderFilteredDelegates(list) {
+      document.getElementById('delegatesGrid').innerHTML = list.map(d => `
+        <div style="background:white;border:1.5px solid var(--border);border-radius:var(--r-lg);padding:18px;">
+          <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;">
+            <div style="width:42px;height:42px;background:var(--grad-warm);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:900;color:white;">${d.name.split(' ').map(n=>n[0]).join('').substring(0,2)}</div>
+            <div><div style="font-size:14px;font-weight:800;">${d.name}</div><div style="font-size:11px;color:var(--text-muted);font-weight:600;">📚 ${d.school}</div></div>
+          </div>
+          <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px;">
+            <span style="background:var(--amber-pale);color:var(--amber);font-size:10px;font-weight:700;padding:3px 8px;border-radius:100px;">🏛️ ${d.committee}</span>
+            <span style="background:var(--bg-soft);color:var(--text-secondary);font-size:10px;font-weight:700;padding:3px 8px;border-radius:100px;">🌍 ${d.country}</span>
+          </div>
+          <button onclick="connectDelegate('${d.name}')" style="width:100%;padding:8px;background:var(--grad-warm);color:white;border:none;border-radius:var(--r-full);font-size:12px;font-weight:700;cursor:pointer;font-family:'Nunito',sans-serif;">Connect →</button>
+        </div>`).join('');
+    }
+
+    window.connectDelegate = function(name) {
+      alert(`Connection request sent to ${name}! They will be notified. (Full messaging in Version 2)`);
+    };
+
+    document.getElementById('logoutBtn').addEventListener('click', async () => {
+      await firebase.auth().signOut();
+      localStorage.removeItem('diq_profile'); localStorage.removeItem('diq_setup');
+      window.location.href='../index.html';
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Dashboard — DelegateIQ</title>
+  <link rel="stylesheet" href="../css/style.css"/>
+  <style>
+    .role-bar{display:flex;gap:3px;padding:3px;background:rgba(255,255,255,0.07);border-radius:8px;margin:6px 10px;}
+    .rsw{flex:1;padding:5px 6px;border:none;border-radius:6px;font-size:11px;font-weight:600;font-family:inherit;cursor:pointer;color:rgba(255,255,255,0.42);background:transparent;transition:all 0.15s;}
+    .rsw.on{background:rgba(255,255,255,0.13);color:#fff;}
+    .mun-item{display:flex;align-items:center;gap:11px;padding:12px 18px;border-bottom:1px solid var(--border,#E4DFD6);cursor:pointer;transition:background 0.12s;}
+    .mun-item:last-child{border-bottom:none;}
+    .mun-item:hover{background:var(--bg-soft,#F5F0E8);}
+    .mun-item.active{background:rgba(28,61,53,0.04);}
+    .mun-dot{width:7px;height:7px;border-radius:50%;background:#D0C9BE;flex-shrink:0;}
+    .mun-dot.on{background:#4E8060;}
+    .mun-info{flex:1;min-width:0;}
+    .mun-n{font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+    .mun-m{font-size:11px;color:#7A8C84;margin-top:1px;}
+    .mun-ab{font-size:10px;font-weight:700;padding:2px 8px;border-radius:99px;background:#E8F0E8;color:#4E8060;white-space:nowrap;}
+    .mun-del{background:none;border:none;cursor:pointer;color:#A8B8B0;font-size:14px;padding:4px;transition:color 0.12s;line-height:1;}
+    .mun-del:hover{color:#B07070;}
+    .stat-g{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:18px;}
+    .stat-c{background:#fff;border:1px solid #E4DFD6;border-radius:13px;padding:16px 18px;}
+    .stat-lbl{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:#7A8C84;margin-bottom:5px;}
+    .stat-val{font-size:1.9rem;font-weight:700;color:#1A2820;line-height:1;font-family:'DM Serif Display',Georgia,serif;}
+    .stat-sub{font-size:11px;color:#A8B8B0;margin-top:3px;}
+    .ctx-card{background:linear-gradient(135deg,#1C3D35,#2A5C52);border-radius:16px;padding:20px 22px;margin-bottom:18px;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;}
+    .ctx-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:rgba(255,255,255,0.4);margin-bottom:6px;}
+    .ctx-title{font-size:17px;font-weight:700;color:white;margin-bottom:8px;}
+    .ctx-chips{display:flex;gap:6px;flex-wrap:wrap;}
+    .ctx-chip{padding:3px 10px;border-radius:99px;background:rgba(255,255,255,0.12);border:1px solid rgba(255,255,255,0.18);font-size:12px;color:rgba(255,255,255,0.8);font-weight:500;}
+    .ctx-actions{display:flex;gap:7px;flex-shrink:0;}
+    .btn-white{background:white;color:#1C3D35;border:none;padding:8px 16px;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;transition:all 0.12s;}
+    .btn-white:hover{background:#F5F0E8;}
+    .btn-out{background:transparent;color:rgba(255,255,255,0.8);border:1px solid rgba(255,255,255,0.25);padding:8px 16px;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;transition:all 0.12s;}
+    .btn-out:hover{background:rgba(255,255,255,0.1);}
+    .qa-g{display:grid;grid-template-columns:2fr 1fr 1fr;gap:10px;margin-bottom:18px;}
+    .qa{display:flex;align-items:center;gap:11px;background:#fff;border:1px solid #E4DFD6;border-radius:13px;padding:15px 16px;text-decoration:none;color:#1A2820;transition:all 0.12s;cursor:pointer;}
+    .qa:hover{border-color:#D0C9BE;box-shadow:0 2px 12px rgba(28,61,53,0.08);transform:translateY(-1px);color:#1A2820;}
+    .qa.main{background:linear-gradient(135deg,#1C3D35,#2A5C52);border:none;box-shadow:0 2px 12px rgba(28,61,53,0.22);}
+    .qa.main:hover{box-shadow:0 4px 20px rgba(28,61,53,0.3);}
+    .qa-icon{width:34px;height:34px;border-radius:8px;background:#F5F0E8;border:1px solid #E4DFD6;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+    .qa-icon svg{width:16px;height:16px;color:#4A6058;}
+    .qa.main .qa-icon{background:rgba(255,255,255,0.12);border-color:rgba(255,255,255,0.15);}
+    .qa.main .qa-icon svg{color:white;}
+    .qa-text h4{font-size:13px;font-weight:700;margin-bottom:1px;}
+    .qa-text p{font-size:11px;color:#8A9E98;}
+    .qa.main .qa-text h4{color:white;}
+    .qa.main .qa-text p{color:rgba(255,255,255,0.55);}
+    .qa-arr{margin-left:auto;color:#D0C9BE;}
+    .qa-arr svg{width:13px;height:13px;}
+    .qa.main .qa-arr{color:rgba(255,255,255,0.3);}
+    .dg{display:grid;grid-template-columns:1.3fr 1fr;gap:14px;}
+    .dc{background:#fff;border:1px solid #E4DFD6;border-radius:16px;overflow:hidden;}
+    .dc-head{display:flex;align-items:center;justify-content:space-between;padding:14px 18px;border-bottom:1px solid #E4DFD6;}
+    .dc-head h3{font-size:13px;font-weight:700;}
+    .dc-body{padding:14px 18px;}
+    .ann-i{display:flex;gap:10px;padding:11px 0;border-bottom:1px solid #F5F0E8;}
+    .ann-i:last-child{border-bottom:none;}
+    .ann-dot{width:6px;height:6px;border-radius:50%;background:#4E8060;flex-shrink:0;margin-top:5px;}
+    .ann-dot.ev{background:#1C3D35;}.ann-dot.dl{background:#B07070;}
+    .ann-ti{font-size:13px;font-weight:600;margin-bottom:2px;}
+    .ann-bo{font-size:12px;color:#4A6058;line-height:1.5;margin-bottom:3px;}
+    .ann-me{font-size:11px;color:#A8B8B0;}
+    .empty-state{text-align:center;padding:20px 0;color:#A8B8B0;font-size:13px;}
+    /* Add MUN modal */
+    .modal-bg{position:fixed;inset:0;z-index:500;background:rgba(26,40,32,0.4);backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;padding:20px;}
+    .modal-box{background:#fff;border:1px solid #E4DFD6;border-radius:20px;padding:26px;width:100%;max-width:460px;box-shadow:0 16px 48px rgba(28,61,53,0.14);}
+    .modal-box h3{font-size:17px;font-weight:700;margin-bottom:4px;}
+    .modal-box p{font-size:13px;color:#7A8C84;margin-bottom:20px;}
+    .mf{display:flex;flex-direction:column;gap:12px;}
+    .mf-row2{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+    .mf label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:#7A8C84;display:block;margin-bottom:4px;}
+    .mf input,.mf select{padding:9px 11px;background:#F5F0E8;border:1.5px solid #E4DFD6;border-radius:9px;font-size:13px;color:#1A2820;outline:none;font-family:inherit;transition:all 0.12s;width:100%;box-sizing:border-box;}
+    .mf input:focus,.mf select:focus{border-color:#1C3D35;background:#fff;box-shadow:0 0 0 3px rgba(28,61,53,0.07);}
+    .mf-acts{display:flex;gap:8px;margin-top:4px;}
+    .mbtn{padding:10px 18px;border-radius:9px;border:none;cursor:pointer;font-size:13px;font-weight:600;font-family:inherit;transition:all 0.12s;}
+    .mbtn.p{background:linear-gradient(135deg,#1C3D35,#2A5C52);color:white;box-shadow:0 2px 8px rgba(28,61,53,0.2);}
+    .mbtn.p:hover{transform:translateY(-1px);}
+    .mbtn.s{background:#F5F0E8;color:#4A6058;border:1px solid #E4DFD6;}
+    .mbtn.s:hover{background:#EDE9E1;}
+    /* Organizer dash */
+    .org-welcome{background:#fff;border:1px solid #E4DFD6;border-radius:16px;padding:28px;text-align:center;}
+    .org-icon{width:48px;height:48px;background:linear-gradient(135deg,#1C3D35,#2A5C52);border-radius:12px;display:flex;align-items:center;justify-content:center;margin:0 auto 14px;}
+    .org-icon svg{width:22px;height:22px;color:white;}
+    .org-welcome h3{font-size:16px;font-weight:700;margin-bottom:7px;}
+    .org-welcome p{font-size:13px;color:#7A8C84;margin-bottom:18px;}
+    .org-btns{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;}
+    .org-btn{padding:9px 18px;border-radius:9px;border:none;cursor:pointer;font-size:13px;font-weight:600;font-family:inherit;text-decoration:none;display:inline-flex;align-items:center;gap:7px;}
+    .org-btn.p{background:linear-gradient(135deg,#1C3D35,#2A5C52);color:white;box-shadow:0 2px 8px rgba(28,61,53,0.2);}
+    .org-btn.s{background:#F5F0E8;color:#4A6058;border:1px solid #E4DFD6;}
+  </style>
+</head>
+<body>
+<!-- Auth Guard -->
+<div id="ag" style="position:fixed;inset:0;z-index:9999;background:#FAF7F2;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;">
+  <div style="width:46px;height:46px;background:linear-gradient(135deg,#1C3D35,#2A5C52);border-radius:11px;display:flex;align-items:center;justify-content:center;">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+  </div>
+  <p style="font-size:13px;color:#7A8C84;font-family:inherit;">Verifying session...</p>
+</div>
+
+<div class="app-page" id="app" style="display:none;">
+  <!-- Sidebar -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-brand">
+      <div class="sidebar-brand-mark">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+      </div>
+      <span class="sidebar-brand-name">DelegateIQ</span>
+    </div>
+
+    <!-- Role switcher -->
+    <div class="role-bar">
+      <button class="rsw on" id="rsw-d" onclick="switchRole('delegate')">Delegate</button>
+      <button class="rsw" id="rsw-o" onclick="switchRole('organizer')">Organizer</button>
+    </div>
+
+    <!-- Delegate nav -->
+    <nav class="sidebar-nav" id="nav-delegate">
+      <div class="nav-section">Main</div>
+      <a href="dashboard.html" class="nav-item active">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>Dashboard
+      </a>
+      <a href="ai-chat.html" class="nav-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>AI Assistant
+      </a>
+      <a href="research.html" class="nav-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>Research
+      </a>
+      <a href="resolutions.html" class="nav-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>Resolutions
+      </a>
+      <div class="nav-section">Community</div>
+      <a href="network.html" class="nav-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>Network
+      </a>
+      <a href="chats.html" class="nav-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>Committee Chats
+      </a>
+      <div class="nav-section">You</div>
+      <a href="profile.html" class="nav-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>Profile & Badges
+      </a>
+    </nav>
+
+    <!-- Organizer nav -->
+    <nav class="sidebar-nav" id="nav-organizer" style="display:none;">
+      <div class="nav-section">Organizer</div>
+      <a href="admin.html" class="nav-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>Admin Panel
+      </a>
+      <a href="admin.html" class="nav-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>Announcements
+      </a>
+      <a href="admin.html" class="nav-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>Manage Users
+      </a>
+    </nav>
+
+    <div class="sidebar-footer">
+      <div class="sidebar-user" onclick="location.href='profile.html'" style="cursor:pointer;">
+        <div class="sidebar-avatar" id="sa">?</div>
+        <div class="sidebar-user-info">
+          <div class="sidebar-user-name" id="sn">You</div>
+          <div class="sidebar-user-role" id="sr">Member</div>
+        </div>
+      </div>
+      <a href="#" class="nav-item" id="logoutBtn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>Logout
+      </a>
+    </div>
+  </aside>
+
+  <!-- Main content -->
+  <main class="app-main">
+    <header class="app-topbar">
+      <button class="menu-btn" onclick="document.getElementById('sidebar').classList.toggle('open')" style="display:none;" id="menuBtn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+      </button>
+      <span class="topbar-title" id="pageTitle">Dashboard</span>
+      <div class="topbar-right">
+        <div class="topbar-avatar" id="ta" onclick="location.href='profile.html'" style="cursor:pointer;">?</div>
+      </div>
+    </header>
+
+    <!-- Delegate Dashboard -->
+    <div class="page-body" id="dash-delegate">
+      <div style="margin-bottom:18px;">
+        <div style="font-size:19px;font-weight:700;letter-spacing:-0.02em;margin-bottom:3px;" id="greeting">Good morning</div>
+        <div style="font-size:13px;color:#7A8C84;">Here is your MUN overview.</div>
+      </div>
+
+      <!-- Stats -->
+      <div class="stat-g">
+        <div class="stat-c"><div class="stat-lbl">Conferences</div><div class="stat-val" id="st-conf">0</div><div class="stat-sub">attended</div></div>
+        <div class="stat-c"><div class="stat-lbl">Badges</div><div class="stat-val" id="st-bdg">1</div><div class="stat-sub">earned</div></div>
+        <div class="stat-c"><div class="stat-lbl">Research</div><div class="stat-val" id="st-res">0</div><div class="stat-sub">sessions</div></div>
+        <div class="stat-c"><div class="stat-lbl">Active MUNs</div><div class="stat-val" id="st-mun">0</div><div class="stat-sub">tracked</div></div>
+      </div>
+
+      <!-- MUN Tracker -->
+      <div style="background:#fff;border:1px solid #E4DFD6;border-radius:16px;margin-bottom:18px;overflow:hidden;">
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 18px;border-bottom:1px solid #E4DFD6;">
+          <h3 style="font-size:13px;font-weight:700;">MUN Preparations</h3>
+          <button onclick="openAddMUN()" style="padding:6px 13px;background:linear-gradient(135deg,#1C3D35,#2A5C52);color:white;border:none;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;">+ Add MUN</button>
+        </div>
+        <div id="munList"><div class="empty-state">No MUNs added yet. Click "+ Add MUN" to get started.</div></div>
+      </div>
+
+      <!-- Active context -->
+      <div class="ctx-card" id="ctxCard" style="display:none;">
+        <div>
+          <div class="ctx-label">Active Context</div>
+          <div class="ctx-title" id="ctxTitle">—</div>
+          <div class="ctx-chips" id="ctxChips"></div>
+        </div>
+        <div class="ctx-actions">
+          <button onclick="openAddMUN()" class="btn-out">+ Add MUN</button>
+          <a href="ai-chat.html" class="btn-white">Ask AI</a>
+        </div>
+      </div>
+
+      <!-- Quick actions -->
+      <div class="qa-g">
+        <a href="ai-chat.html" class="qa main">
+          <div class="qa-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></div>
+          <div class="qa-text"><h4>AI Assistant</h4><p>Ask anything about your committee</p></div>
+          <div class="qa-arr"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></div>
+        </a>
+        <a href="research.html" class="qa">
+          <div class="qa-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></div>
+          <div class="qa-text"><h4>Research</h4><p>UN docs & tools</p></div>
+        </a>
+        <a href="resolutions.html" class="qa">
+          <div class="qa-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div>
+          <div class="qa-text"><h4>Resolutions</h4><p>Draft clauses</p></div>
+        </a>
+      </div>
+
+      <!-- Bottom grid -->
+      <div class="dg">
+        <div class="dc">
+          <div class="dc-head"><h3>Announcements</h3><span style="font-size:10px;font-weight:700;padding:2px 8px;border-radius:99px;background:#E8F0EE;color:#4E8060;" id="annCnt">0</span></div>
+          <div class="dc-body" id="annList"><div class="empty-state">No announcements yet.</div></div>
+        </div>
+        <div class="dc">
+          <div class="dc-head"><h3>Recent Activity</h3></div>
+          <div class="dc-body">
+            <div class="ann-i"><div class="ann-dot"></div><div><div class="ann-ti">Account created</div><div class="ann-me">Welcome to DelegateIQ</div></div></div>
+            <div class="ann-i" id="act-research" style="display:none;"><div class="ann-dot"></div><div><div class="ann-ti">Research sessions</div><div class="ann-me" id="act-research-meta"></div></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Organizer Dashboard -->
+    <div class="page-body" id="dash-organizer" style="display:none;">
+      <div style="margin-bottom:18px;">
+        <div style="font-size:19px;font-weight:700;letter-spacing:-0.02em;margin-bottom:3px;">Organizer Dashboard</div>
+        <div style="font-size:13px;color:#7A8C84;">Manage conferences, committees, and delegate announcements.</div>
+      </div>
+      <div class="org-welcome">
+        <div class="org-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg></div>
+        <h3>Admin Panel</h3>
+        <p>Post conference announcements, manage committee lists, and see registered delegates — all from the Admin Panel.</p>
+        <div class="org-btns">
+          <a href="admin.html" class="org-btn p">Open Admin Panel</a>
+          <button class="org-btn s" onclick="switchRole('delegate')">Switch to Delegate View</button>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- Add MUN Modal -->
+<div class="modal-bg" id="munModal" style="display:none;" onclick="if(event.target===this)closeMUN()">
+  <div class="modal-box">
+    <h3>Add MUN Preparation</h3>
+    <p>Track multiple conferences. Click any to set it as active — your AI context updates automatically.</p>
+    <div class="mf">
+      <div>
+        <label>Conference Name</label>
+        <input type="text" id="m-name" placeholder="e.g. DELMUN 2025, HMUN 2026"/>
+      </div>
+      <div class="mf-row2">
+        <div>
+          <label>Committee Type</label>
+          <select id="m-type" onchange="updateCommOpts()">
+            <option value="un">UN Committee</option>
+            <option value="indian">Indian Committee</option>
+          </select>
+        </div>
+        <div>
+          <label>Committee</label>
+          <select id="m-comm"></select>
+        </div>
+      </div>
+      <div>
+        <label>Country / Portfolio</label>
+        <input type="text" id="m-country" placeholder="e.g. France, India, Ministry of Finance"/>
+      </div>
+      <div>
+        <label>Agenda Topic</label>
+        <input type="text" id="m-topic" placeholder="e.g. Human Trafficking, Defence Policy"/>
+      </div>
+      <div>
+        <label>Conference Date <span style="color:#A8B8B0;font-size:10px;font-weight:400;text-transform:none;">(optional)</span></label>
+        <input type="date" id="m-date"/>
+      </div>
+      <div class="mf-acts">
+        <button class="mbtn p" onclick="saveMUN()">Add MUN</button>
+        <button class="mbtn s" onclick="closeMUN()">Cancel</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+<script>
+const fc={apiKey:"AIzaSyCqNmnpQRg5uUYu4Pp_k0k90wNBmJxpuH0",authDomain:"delegate-iq-2025.firebaseapp.com",projectId:"delegate-iq-2025",storageBucket:"delegate-iq-2025.firebasestorage.app",messagingSenderId:"612696020579",appId:"1:612696020579:web:90255861a0d531f2580a56"};
+if(!firebase.apps.length) firebase.initializeApp(fc);
+const auth=firebase.auth();
+
+const UN_COMM=['UNSC','UNGA','WHO','HRC','UNHRC','UNODC','ECOSOC','ICJ','DISEC','SPECPOL','SOCHUM','LEGAL','UNEP'];
+const IND_COMM=['Lok Sabha','Rajya Sabha','Cabinet Committee','State Legislature','NITI Aayog','Ministry of External Affairs','Ministry of Finance','Ministry of Defence','CBI Simulation'];
+
+function gP(){try{return JSON.parse(localStorage.getItem('diq_profile')||'{}');}catch(e){return{};}}
+function gM(){try{return JSON.parse(localStorage.getItem('diq_muns')||'[]');}catch(e){return[];}}
+function sM(m){localStorage.setItem('diq_muns',JSON.stringify(m));}
+
+let currentRole='delegate';
+
+firebase.auth().onAuthStateChanged(function(user){
+  if(!user){window.location.replace('login.html');return;}
+  const g=document.getElementById('ag'),ap=document.getElementById('app');
+  g.style.opacity='0';g.style.transition='opacity 0.3s';
+  setTimeout(function(){g.style.display='none';ap.style.display='flex';},300);
+
+  const p=gP();
+  const name=p.displayName||user.displayName||user.email.split('@')[0];
+  const initials=p.initials||(name.substring(0,2).toUpperCase());
+
+  document.getElementById('sa').textContent=initials;
+  document.getElementById('sn').textContent=name;
+  document.getElementById('sr').textContent=p.role==='organizer'?'Organizer':'Delegate';
+  document.getElementById('ta').textContent=initials;
+
+  const h=new Date().getHours();
+  const g2=h<12?'Good morning':h<17?'Good afternoon':'Good evening';
+  document.getElementById('greeting').textContent=g2+', '+name.split(' ')[0];
+
+  document.getElementById('st-conf').textContent=(p.conferences||[]).length;
+  document.getElementById('st-bdg').textContent=(p.badges||['first_login']).length;
+  document.getElementById('st-res').textContent=p.researchCount||0;
+
+  if(p.researchCount>0){
+    document.getElementById('act-research').style.display='flex';
+    document.getElementById('act-research-meta').textContent=p.researchCount+' session'+(p.researchCount!==1?'s':'');
+  }
+
+  currentRole=p.role||'delegate';
+  renderRole();
+  renderMUNs();
+  loadAnnouncements();
+
+  // Show menu btn on mobile
+  if(window.innerWidth<=768) document.getElementById('menuBtn').style.display='flex';
+});
+
+function renderRole(){
+  const isOrg=currentRole==='organizer';
+  document.getElementById('nav-delegate').style.display=isOrg?'none':'flex';
+  document.getElementById('nav-organizer').style.display=isOrg?'flex':'none';
+  document.getElementById('dash-delegate').style.display=isOrg?'none':'block';
+  document.getElementById('dash-organizer').style.display=isOrg?'block':'none';
+  document.getElementById('rsw-d').classList.toggle('on',!isOrg);
+  document.getElementById('rsw-o').classList.toggle('on',isOrg);
+  document.getElementById('sr').textContent=isOrg?'Organizer':'Delegate';
+  document.getElementById('pageTitle').textContent=isOrg?'Organizer Panel':'Dashboard';
+}
+
+window.switchRole=function(role){
+  currentRole=role;
+  const p=gP(); p.role=role;
+  localStorage.setItem('diq_profile',JSON.stringify(p));
+  renderRole();
+};
+
+function renderMUNs(){
+  const muns=gM();
+  const list=document.getElementById('munList');
+  document.getElementById('st-mun').textContent=muns.length;
+  if(!muns.length){
+    list.innerHTML='<div class="empty-state">No MUNs added yet. Click "+ Add MUN" to get started.</div>';
+    document.getElementById('ctxCard').style.display='none';
+    return;
+  }
+  list.innerHTML=muns.map(function(m,i){
+    return '<div class="mun-item'+(m.active?' active':'')+'" onclick="setActive('+i+')" id="mi'+i+'">'+
+      '<div class="mun-dot'+(m.active?' on':'')+'"></div>'+
+      '<div class="mun-info">'+
+        '<div class="mun-n">'+esc(m.name)+'</div>'+
+        '<div class="mun-m">'+esc(m.committee||'')+(m.country?' &middot; '+esc(m.country):'')+(m.date?' &middot; '+new Date(m.date).toLocaleDateString('en-IN',{month:'short',year:'numeric'}):'')+'</div>'+
+      '</div>'+
+      (m.active?'<span class="mun-ab">Active</span>':'')+
+      '<button class="mun-del" onclick="event.stopPropagation();delMUN('+i+')" title="Remove">&#x2715;</button>'+
+    '</div>';
+  }).join('');
+
+  const active=muns.find(function(m){return m.active;});
+  if(active){
+    document.getElementById('ctxCard').style.display='flex';
+    document.getElementById('ctxTitle').textContent=active.name;
+    let chips='';
+    if(active.committee) chips+='<span class="ctx-chip">'+esc(active.committee)+'</span>';
+    if(active.country) chips+='<span class="ctx-chip">'+esc(active.country)+'</span>';
+    if(active.topic) chips+='<span class="ctx-chip">'+esc(active.topic)+'</span>';
+    document.getElementById('ctxChips').innerHTML=chips;
+    localStorage.setItem('diq_setup',JSON.stringify({committee:active.committee,country:active.country,topic:active.topic,conferenceName:active.name,committeeType:active.committeeType||'un'}));
+  }
+}
+
+window.setActive=function(idx){
+  const muns=gM();
+  muns.forEach(function(m,i){m.active=i===idx;});
+  sM(muns); renderMUNs();
+};
+
+window.delMUN=function(idx){
+  if(!confirm('Remove this MUN?')) return;
+  const muns=gM();
+  muns.splice(idx,1);
+  if(muns.length&&!muns.some(function(m){return m.active;})) muns[0].active=true;
+  sM(muns); renderMUNs();
+};
+
+window.openAddMUN=function(){
+  document.getElementById('munModal').style.display='flex';
+  updateCommOpts();
+};
+window.closeMUN=function(){document.getElementById('munModal').style.display='none';};
+
+window.updateCommOpts=function(){
+  const t=document.getElementById('m-type').value;
+  const s=document.getElementById('m-comm');
+  const opts=t==='indian'?IND_COMM:UN_COMM;
+  s.innerHTML=opts.map(function(o){return '<option>'+o+'</option>';}).join('');
+};
+
+window.saveMUN=function(){
+  const name=document.getElementById('m-name').value.trim();
+  if(!name){alert('Please enter a conference name.');return;}
+  const muns=gM();
+  muns.push({
+    id:Date.now(),name:name,
+    committeeType:document.getElementById('m-type').value,
+    committee:document.getElementById('m-comm').value,
+    country:document.getElementById('m-country').value.trim(),
+    topic:document.getElementById('m-topic').value.trim(),
+    date:document.getElementById('m-date').value||null,
+    active:muns.length===0
+  });
+  sM(muns);
+  closeMUN();
+  ['m-name','m-country','m-topic','m-date'].forEach(function(id){document.getElementById(id).value='';});
+  renderMUNs();
+};
+
+function loadAnnouncements(){
+  let anns=[];try{anns=JSON.parse(localStorage.getItem('diq_announcements')||'[]');}catch(e){}
+  const list=document.getElementById('annList');
+  document.getElementById('annCnt').textContent=anns.length;
+  if(!anns.length){list.innerHTML='<div class="empty-state">No announcements yet.</div>';return;}
+  list.innerHTML=anns.slice(0,4).map(function(a){
+    const cls=a.type==='deadline'?'dl':a.type==='event'?'ev':'';
+    return '<div class="ann-i"><div class="ann-dot '+cls+'"></div><div>'+
+      '<div class="ann-ti">'+esc(a.title)+'</div>'+
+      '<div class="ann-bo">'+esc(a.body.substring(0,70))+(a.body.length>70?'...':'')+'</div>'+
+      '<div class="ann-me">'+new Date(a.date).toLocaleDateString('en-IN',{day:'numeric',month:'short'})+'</div>'+
+    '</div></div>';
+  }).join('');
+}
+
+document.getElementById('logoutBtn').addEventListener('click',function(e){
+  e.preventDefault();
+  auth.signOut();
+  localStorage.removeItem('diq_profile');localStorage.removeItem('diq_setup');localStorage.removeItem('diq_muns');
+  window.location.href='../index.html';
+});
+
+document.addEventListener('click',function(e){
+  const sb=document.getElementById('sidebar'),mb=document.getElementById('menuBtn');
+  if(sb.classList.contains('open')&&!sb.contains(e.target)&&!mb.contains(e.target)) sb.classList.remove('open');
+});
+
+function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+</script>
+</body>
+</html>

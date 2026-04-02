@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Profile — DelegateIQ</title>
+  <link rel="stylesheet" href="../css/style.css"/>
+</head>
+<body class="app-page">
+  <!-- Auth Guard -->
+  <div id="authGuard" style="position:fixed;top:0;left:0;width:100vw;height:100vh;background:#FAF8F4;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:16px;z-index:99999;">
+    <div style="width:56px;height:56px;background:linear-gradient(135deg,#1B3A35,#2D5A52);border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:900;color:white;font-family:'Nunito',sans-serif;">D</div>
+    <p style="font-size:14px;font-weight:600;color:#8A9E98;font-family:'Nunito',sans-serif;">Verifying your session...</p>
+  </div>
+
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-logo"><div class="logo-mark">D</div><span class="logo-text">DelegateIQ</span></div>
+    <nav class="sidebar-nav">
+      <div class="nav-section-label">Main</div>
+      <a href="dashboard.html" class="nav-item"><span class="nav-icon">🏠</span><span>Dashboard</span></a>
+      <a href="ai-chat.html" class="nav-item"><span class="nav-icon">🤖</span><span>AI Assistant</span></a>
+      <a href="research.html" class="nav-item"><span class="nav-icon">🔍</span><span>Research</span></a>
+      <a href="resolutions.html" class="nav-item"><span class="nav-icon">📜</span><span>Resolutions</span></a>
+      <div class="nav-section-label">Community</div>
+      <a href="network.html" class="nav-item"><span class="nav-icon">👥</span><span>Network</span></a>
+      <a href="chats.html" class="nav-item"><span class="nav-icon">💬</span><span>Chats</span></a>
+      <div class="nav-section-label">You</div>
+      <a href="profile.html" class="nav-item active"><span class="nav-icon">👤</span><span>Profile</span></a>
+    </nav>
+    <div class="sidebar-bottom">
+      <div class="sidebar-user" onclick="location.href='profile.html'">
+        <div class="avatar-btn" id="sidebarAvatar">?</div>
+        <div><div class="sidebar-user-name" id="sidebarName">You</div><div class="sidebar-user-role" id="sidebarSchool">Member</div></div>
+      </div>
+      <a href="#" class="nav-item" id="logoutBtn"><span class="nav-icon">🚪</span><span>Logout</span></a>
+    </div>
+  </aside>
+
+  <main class="main-content">
+    <header class="app-header">
+      <button class="sidebar-toggle" onclick="document.getElementById('sidebar').classList.toggle('open')">☰</button>
+      <h2>👤 Profile</h2>
+      <div class="header-right"><div class="avatar-btn" id="headerAvatar">?</div></div>
+    </header>
+
+    <div class="profile-body">
+      <div class="profile-hero">
+        <div class="profile-avatar-lg" id="profileAvatar">?</div>
+        <div class="profile-details">
+          <div class="profile-name" id="profileName">Your Name</div>
+          <div class="profile-school" id="profileSchool">DelegateIQ Member</div>
+          <div class="profile-bio">Passionate MUN delegate. Building my career one committee at a time.</div>
+          <div class="profile-tags">
+            <span class="p-tag" id="tagRole">Delegate</span>
+            <span class="p-tag" id="tagCommittee">MUN</span>
+            <span class="p-tag" id="tagCountry">DelegateIQ</span>
+          </div>
+        </div>
+        <div class="profile-stats">
+          <div><span class="ps-n" id="psConferences">0</span><span class="ps-l">Conferences</span></div>
+          <div><span class="ps-n" id="psBadges">1</span><span class="ps-l">Badges</span></div>
+          <div><span class="ps-n" id="psResearch">0</span><span class="ps-l">Research</span></div>
+        </div>
+      </div>
+
+      <div class="profile-tabs">
+        <button class="ptab active" onclick="switchTab('badges',this)">🏅 Badges</button>
+        <button class="ptab" onclick="switchTab('certificates',this)">📜 Certificates</button>
+        <button class="ptab" onclick="switchTab('awards',this)">🏆 Awards</button>
+        <button class="ptab" onclick="switchTab('history',this)">📅 History</button>
+      </div>
+
+      <!-- BADGES — sequential ordered -->
+      <div id="tab-badges">
+        <div class="badges-grid" id="badgesGrid"></div>
+      </div>
+
+      <!-- CERTIFICATES -->
+      <div id="tab-certificates" style="display:none;">
+        <div id="certGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px;"></div>
+        <div style="margin-top:16px;padding:16px;background:var(--amber-pale);border:1.5px solid var(--amber-soft);border-radius:var(--r-lg);">
+          <h4 style="font-size:13px;font-weight:800;color:var(--midnight);margin-bottom:4px;">How to earn certificates</h4>
+          <p style="font-size:12px;color:var(--text-secondary);font-weight:600;">Certificates are awarded when you complete milestones — first conference, 5 conferences, 10 research sessions, and winning your first award.</p>
+        </div>
+      </div>
+
+      <!-- AWARDS -->
+      <div id="tab-awards" style="display:none;">
+        <div class="awards-grid" id="awardsGrid">
+          <div style="color:var(--text-muted);font-size:14px;padding:20px;font-weight:600;">No awards yet. Add a conference with an award!</div>
+        </div>
+        <button class="btn-ghost-sm" style="margin-top:14px;" onclick="addConferenceFlow()">+ Add Award</button>
+      </div>
+
+      <!-- HISTORY -->
+      <div id="tab-history" style="display:none;">
+        <div class="history-list" id="historyList">
+          <div style="color:var(--text-muted);font-size:14px;padding:20px;font-weight:600;">No conferences yet. Add your first!</div>
+        </div>
+        <button class="btn-ghost-sm" style="margin-top:14px;" onclick="addConferenceFlow()">+ Add Conference</button>
+      </div>
+    </div>
+  </main>
+
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+  <script>
+    const fc={apiKey:"AIzaSyCqNmnpQRg5uUYu4Pp_k0k90wNBmJxpuH0",authDomain:"delegate-iq-2025.firebaseapp.com",projectId:"delegate-iq-2025",storageBucket:"delegate-iq-2025.firebasestorage.app",messagingSenderId:"612696020579",appId:"1:612696020579:web:90255861a0d531f2580a56"};
+    if(!firebase.apps.length) firebase.initializeApp(fc);
+
+    // BADGES in proper sequence with HOW TO EARN for locked ones
+    const BADGE_SEQUENCE = [
+      {id:'first_login',     icon:'🚀', name:'First Step',      desc:'Joined DelegateIQ',          how:'Sign up to DelegateIQ'},
+      {id:'first_research',  icon:'🔍', name:'Researcher',       desc:'First AI research session',   how:'Use the AI Assistant once'},
+      {id:'resolution_draft',icon:'📜', name:'Drafter',          desc:'Drafted a resolution',        how:'Visit the Resolution Drafter'},
+      {id:'first_conference',icon:'🏛️', name:'Delegate',         desc:'Attended first conference',   how:'Add your first conference'},
+      {id:'paper_writer',    icon:'📄', name:'Paper Writer',     desc:'Built a position paper',      how:'Generate a position paper in Research'},
+      {id:'committee_join',  icon:'💬', name:'Committee Member', desc:'Sent first chat message',     how:'Send a message in Committee Chats'},
+      {id:'first_award',     icon:'🏆', name:'Award Winner',     desc:'Won first MUN award',         how:'Log a conference win in Awards'},
+      {id:'five_conferences',icon:'⭐', name:'Seasoned',         desc:'Attended 5 conferences',      how:'Add 5 conferences to your history'},
+      {id:'ten_research',    icon:'🎓', name:'Scholar',          desc:'10 research sessions',        how:'Use AI Assistant 10 times'},
+    ];
+
+    // Certificates earned for milestones
+    const CERTIFICATES = [
+      {id:'first_login',     title:'Welcome Certificate',    detail:'Joined the DelegateIQ platform'},
+      {id:'first_conference',title:'Delegate Certificate',   detail:'Completed first MUN conference'},
+      {id:'five_conferences',title:'Excellence Certificate', detail:'Attended 5 MUN conferences'},
+      {id:'first_award',     title:'Achievement Certificate',detail:'Won first MUN award'},
+      {id:'ten_research',    title:'Scholar Certificate',    detail:'Completed 10 research sessions'},
+    ];
+
+    function getProfile(){try{return JSON.parse(localStorage.getItem('diq_profile')||'{}');}catch(e){return{};}}
+    function getSetup(){try{return JSON.parse(localStorage.getItem('diq_setup')||'{}');}catch(e){return{};}}
+
+    // Load from localStorage instantly
+    var profile=getProfile(), setup=getSetup();
+    if(profile.displayName){
+      var i=profile.initials||profile.displayName.substring(0,2).toUpperCase();
+      document.getElementById('sidebarAvatar').textContent=i;
+      document.getElementById('sidebarName').textContent=profile.displayName;
+      document.getElementById('sidebarSchool').textContent=profile.school||'Member';
+      document.getElementById('headerAvatar').textContent=i;
+      document.getElementById('profileAvatar').textContent=i;
+      document.getElementById('profileName').textContent=profile.displayName;
+      document.getElementById('profileSchool').textContent='📚 '+(profile.school||'DelegateIQ Member');
+    }
+    if(setup.committee) document.getElementById('tagCommittee').textContent='🏛️ '+setup.committee;
+    if(setup.country) document.getElementById('tagCountry').textContent='🌍 '+setup.country;
+    if(profile.role) document.getElementById('tagRole').textContent=profile.role==='organizer'?'🎯 Organizer':'🎓 Delegate';
+
+    var badges=profile.badges||['first_login'];
+    var conferences=profile.conferences||[];
+    var researchCount=profile.researchCount||0;
+    document.getElementById('psConferences').textContent=conferences.length;
+    document.getElementById('psBadges').textContent=badges.length;
+    document.getElementById('psResearch').textContent=researchCount;
+
+    renderBadges(badges);
+    renderCerts(badges,profile);
+    renderHistory(conferences);
+    renderAwards(conferences);
+
+    firebase.auth().onAuthStateChanged(function(user){
+      if(!user){window.location.replace('login.html');return;}
+      var g=document.getElementById('authGuard');
+      if(g){g.style.opacity='0';g.style.transition='opacity 0.3s';setTimeout(function(){g.style.display='none';},300);}
+      if(!profile.displayName&&user.displayName){
+        var n=user.displayName, i=n.substring(0,2).toUpperCase();
+        document.getElementById('sidebarAvatar').textContent=i;
+        document.getElementById('headerAvatar').textContent=i;
+        document.getElementById('sidebarName').textContent=n;
+        document.getElementById('profileAvatar').textContent=i;
+        document.getElementById('profileName').textContent=n;
+      }
+    });
+
+    function renderBadges(earned){
+      var grid=document.getElementById('badgesGrid');
+      grid.innerHTML='';
+      BADGE_SEQUENCE.forEach(function(b,idx){
+        var e=earned.includes(b.id);
+        var div=document.createElement('div');
+        div.className='badge-card '+(e?'earned':'locked');
+        div.innerHTML=
+          '<div class="badge-num">'+(idx+1)+'</div>'+
+          '<div class="badge-icon-wrap">'+b.icon+'</div>'+
+          '<div class="badge-info">'+
+            '<div class="badge-card-name">'+b.name+'</div>'+
+            '<div class="badge-card-desc">'+b.desc+'</div>'+
+            (!e?'<div class="badge-how">How to earn: '+b.how+'</div>':'')+
+          '</div>'+
+          '<div class="badge-status '+(e?'earned-status':'locked-status')+'">'+(e?'✅ Earned':'🔒 Locked')+'</div>';
+        grid.appendChild(div);
+      });
+    }
+
+    function renderCerts(earned, prof){
+      var grid=document.getElementById('certGrid');
+      grid.innerHTML='';
+      var earned_certs=CERTIFICATES.filter(function(c){return earned.includes(c.id);});
+      if(!earned_certs.length){
+        grid.innerHTML='<div style="color:var(--text-muted);font-size:14px;padding:20px;font-weight:600;">No certificates yet. Earn badges to unlock certificates!</div>';
+        return;
+      }
+      earned_certs.forEach(function(c){
+        var div=document.createElement('div');
+        div.className='certificate-card';
+        div.innerHTML=
+          '<div class="cert-logo">📜</div>'+
+          '<div style="font-size:11px;letter-spacing:2px;text-transform:uppercase;opacity:0.7;margin-bottom:8px;position:relative;z-index:1;">DelegateIQ</div>'+
+          '<div class="cert-title">'+c.title+'</div>'+
+          '<div class="cert-name">'+(prof.displayName||'Delegate')+'</div>'+
+          '<div class="cert-detail">'+c.detail+'</div>'+
+          '<div class="cert-badge">Certificate of Achievement</div>'+
+          '<button onclick="downloadCert(\''+c.title+'\',\''+c.detail+'\')" style="display:block;margin:16px auto 0;background:rgba(255,255,255,0.2);border:1px solid rgba(255,255,255,0.3);color:white;padding:8px 18px;border-radius:100px;font-size:12px;font-weight:700;cursor:pointer;font-family:Nunito,sans-serif;position:relative;z-index:1;">Download Certificate</button>';
+        grid.appendChild(div);
+      });
+    }
+
+    window.downloadCert=function(title, detail){
+      alert('Certificate download feature coming soon! For now, take a screenshot of this certificate to save it.');
+    };
+
+    function renderHistory(confs){
+      if(!confs.length) return;
+      document.getElementById('historyList').innerHTML=confs.slice().reverse().map(function(c){
+        return '<div class="hist-item">'+
+          '<div class="hist-date">'+(c.date?new Date(c.date).toLocaleDateString('en-IN',{month:'short',year:'numeric'}):'Recent')+'</div>'+
+          '<div class="hist-info"><h4>'+c.name+'</h4><p>'+(c.committee||'')+' '+(c.country?'· 🌍 '+c.country:'')+'</p>'+
+          (c.award?'<span class="badge-chip chip-green">🏆 Award</span>':'')+
+          '</div></div>';
+      }).join('');
+    }
+
+    function renderAwards(confs){
+      var awarded=confs.filter(function(c){return c.award;});
+      if(!awarded.length) return;
+      document.getElementById('awardsGrid').innerHTML=awarded.map(function(c,i){
+        return '<div class="award-card '+(i===0?'gold':i===1?'silver':'bronze')+'">'+
+          '<div class="award-medal">'+(i===0?'🥇':i===1?'🥈':'🏅')+'</div>'+
+          '<div class="award-info"><h4>'+(c.awardName||'Award')+'</h4><p>'+c.name+' · '+(c.committee||'')+'</p></div>'+
+          '</div>';
+      }).join('');
+    }
+
+    window.addConferenceFlow=function(){
+      var name=prompt('Conference name (e.g. DELMUN 2025):');
+      if(!name) return;
+      var committee=prompt('Committee:')||'';
+      var country=prompt('Country you represented:')||'';
+      var award=confirm('Did you win an award?');
+      var awardName=award?(prompt('Award name:')||'Award'):'';
+      var p=getProfile();
+      if(!p.conferences) p.conferences=[];
+      p.conferences.push({name:name,committee:committee,country:country,award:award,awardName:awardName,date:new Date().toISOString()});
+      if(!p.badges) p.badges=['first_login'];
+      if(p.conferences.length===1&&!p.badges.includes('first_conference')) p.badges.push('first_conference');
+      if(p.conferences.length>=5&&!p.badges.includes('five_conferences')) p.badges.push('five_conferences');
+      if(award&&!p.badges.includes('first_award')) p.badges.push('first_award');
+      localStorage.setItem('diq_profile',JSON.stringify(p));
+      location.reload();
+    };
+
+    window.switchTab=function(name,btn){
+      document.querySelectorAll('[id^="tab-"]').forEach(function(e){e.style.display='none';});
+      document.querySelectorAll('.ptab').forEach(function(b){b.classList.remove('active');});
+      document.getElementById('tab-'+name).style.display='block';
+      btn.classList.add('active');
+    };
+
+    document.getElementById('logoutBtn').addEventListener('click',function(){
+      firebase.auth().signOut();
+      localStorage.removeItem('diq_profile');localStorage.removeItem('diq_setup');
+      window.location.href='../index.html';
+    });
+    document.addEventListener('click',function(e){
+      var sb=document.getElementById('sidebar'),tg=document.querySelector('.sidebar-toggle');
+      if(sb.classList.contains('open')&&!sb.contains(e.target)&&!tg.contains(e.target)) sb.classList.remove('open');
+    });
+  </script>
+</body>
+</html>

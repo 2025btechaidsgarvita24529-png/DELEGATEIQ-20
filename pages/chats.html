@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Chats — DelegateIQ</title>
+  <link rel="stylesheet" href="../css/style.css"/>
+<style>
+  /* Auth Guard Overlay */
+  #authGuard {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100vw; height: 100vh;
+    background: #FAF7F2;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: 16px;
+    z-index: 99999;
+  }
+  #authGuard .ag-logo {
+    width: 56px; height: 56px;
+    background: #D97706;
+    border-radius: 14px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 28px; font-weight: 900; color: white;
+    font-family: 'Trebuchet MS', sans-serif;
+    animation: agPulse 1.5s ease-in-out infinite;
+  }
+  #authGuard p {
+    font-size: 14px; font-weight: 600;
+    color: #8B7355;
+    font-family: 'Nunito', sans-serif;
+  }
+  @keyframes agPulse {
+    0%, 100% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(0.95); opacity: 0.8; }
+  }
+</style>
+</head>
+<body class="app-page">
+  <!-- AUTH GUARD -->
+  <style id="authGuardStyle">
+    body.app-page .main-content, body.app-page aside.sidebar { visibility:hidden !important; }
+    #authLoadingScreen { position:fixed;top:0;left:0;width:100%;height:100%;background:#FAF7F2;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:9999; }
+    .auth-spinner { width:44px;height:44px;border:3px solid #E8DFD0;border-top-color:#D97706;border-radius:50%;animation:authspin 0.8s linear infinite;margin-bottom:16px; }
+    @keyframes authspin { to { transform:rotate(360deg); } }
+    .auth-logo-txt { font-size:28px;font-weight:900;color:#1A1008;font-family:Trebuchet MS; }
+    .auth-sub-txt { font-size:13px;color:#8B7355;font-weight:600;margin-top:6px; }
+  </style>
+  <div id="authLoadingScreen">
+    <div class="auth-spinner"></div>
+    <div class="auth-logo-txt">DelegateIQ</div>
+    <div class="auth-sub-txt">Verifying your session...</div>
+  </div>
+  <!-- Auth Guard Overlay - hidden after auth check -->
+  <div id="authGuard">
+    <div class="ag-logo">D</div>
+    <p>Verifying your session...</p>
+  </div>
+
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-logo"><div class="logo-mark">D</div><span class="logo-text">DelegateIQ</span></div>
+    <nav class="sidebar-nav">
+      <div class="nav-section-label">Main</div>
+      <a href="dashboard.html" class="nav-item"><span class="nav-icon">🏠</span><span>Dashboard</span></a>
+      <a href="ai-chat.html" class="nav-item"><span class="nav-icon">🤖</span><span>AI Assistant</span></a>
+      <a href="research.html" class="nav-item"><span class="nav-icon">🔍</span><span>Research</span></a>
+      <a href="resolutions.html" class="nav-item"><span class="nav-icon">📜</span><span>Resolutions</span></a>
+      <div class="nav-section-label">Community</div>
+      <a href="network.html" class="nav-item"><span class="nav-icon">👥</span><span>Network</span></a>
+      <a href="chats.html" class="nav-item active"><span class="nav-icon">💬</span><span>Chats</span></a>
+      <div class="nav-section-label">You</div>
+      <a href="profile.html" class="nav-item"><span class="nav-icon">👤</span><span>Profile</span></a>
+      <a href="profile.html" class="nav-item"><span class="nav-icon">🏅</span><span>Badges</span></a>
+    </nav>
+    <div class="sidebar-bottom">
+      <div class="sidebar-user" onclick="location.href='profile.html'">
+        <div class="avatar-btn" id="sidebarAvatar">?</div>
+        <div><div class="sidebar-user-name" id="sidebarName">Loading...</div><div class="sidebar-user-role">Member</div></div>
+      </div>
+      <a href="#" class="nav-item" id="logoutBtn"><span class="nav-icon">🚪</span><span>Logout</span></a>
+    </div>
+  </aside>
+
+  <main class="main-content" style="display:flex;flex-direction:row;">
+
+    <!-- CHAT LIST -->
+    <div id="chatList" style="width:280px;border-right:1.5px solid var(--border);background:white;display:flex;flex-direction:column;flex-shrink:0;">
+      <div style="padding:16px;border-bottom:1px solid var(--border);">
+        <h3 style="font-size:16px;font-weight:800;color:var(--text-primary);margin-bottom:10px;">💬 Chats</h3>
+        <input type="text" placeholder="Search chats..." style="width:100%;padding:8px 12px;background:var(--bg-soft);border:1.5px solid var(--border);border-radius:var(--r-full);font-size:13px;font-family:'Nunito',sans-serif;outline:none;color:var(--text-primary);"/>
+      </div>
+      <div style="flex:1;overflow-y:auto;" id="chatRooms"></div>
+    </div>
+
+    <!-- CHAT WINDOW -->
+    <div style="flex:1;display:flex;flex-direction:column;">
+      <div style="padding:14px 20px;border-bottom:1.5px solid var(--border);background:white;display:flex;align-items:center;gap:12px;">
+        <button class="sidebar-toggle" onclick="document.getElementById('sidebar').classList.toggle('open')" style="display:none" id="mobileToggle">☰</button>
+        <div id="activeChatTitle" style="font-size:15px;font-weight:800;color:var(--text-primary);">Select a chat</div>
+        <div id="activeChatMeta" style="font-size:11px;color:var(--text-muted);font-weight:600;margin-left:auto;"></div>
+      </div>
+
+      <div id="chatMessages" style="flex:1;overflow-y:auto;padding:20px;display:flex;flex-direction:column;gap:12px;background:var(--bg-base);">
+        <div style="text-align:center;color:var(--text-muted);font-size:14px;font-weight:600;margin:auto;">
+          <div style="font-size:40px;margin-bottom:12px;">💬</div>
+          Select a chat room to start messaging
+        </div>
+      </div>
+
+      <div id="chatInputArea" style="padding:14px 20px;background:white;border-top:1.5px solid var(--border);display:none;">
+        <div style="display:flex;gap:10px;align-items:flex-end;">
+          <input type="text" id="msgInput" placeholder="Type a message..." onkeydown="if(event.key==='Enter')sendChatMsg()" style="flex:1;padding:10px 14px;background:var(--bg-soft);border:1.5px solid var(--border);border-radius:var(--r-full);font-size:14px;font-family:'Nunito',sans-serif;outline:none;color:var(--text-primary);transition:border-color 0.2s;" onfocus="this.style.borderColor='var(--amber)'" onblur="this.style.borderColor='var(--border)'"/>
+          <button onclick="sendChatMsg()" style="width:38px;height:38px;background:var(--grad-warm);border:none;color:white;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+          </button>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+  <script>
+    const fc = {apiKey:"AIzaSyCqNmnpQRg5uUYu4Pp_k0k90wNBmJxpuH0",authDomain:"delegate-iq-2025.firebaseapp.com",projectId:"delegate-iq-2025",storageBucket:"delegate-iq-2025.firebasestorage.app",messagingSenderId:"612696020579",appId:"1:612696020579:web:90255861a0d531f2580a56"};
+    if(!firebase.apps.length) firebase.initializeApp(fc);
+    // Load sidebar INSTANTLY from localStorage — no waiting
+    (function(){
+      var p={};try{p=JSON.parse(localStorage.getItem('diq_profile')||'{}');}catch(e){}
+      if(p.displayName){
+        var i=p.initials||p.displayName.substring(0,2).toUpperCase();
+        var a=document.getElementById('sidebarAvatar');
+        var n=document.getElementById('sidebarName');
+        var s=document.getElementById('sidebarSchool');
+        var h=document.getElementById('headerAvatar');
+        if(a) a.textContent=i;
+        if(n) n.textContent=p.displayName;
+        if(s) s.textContent=p.school||'Member';
+        if(h) h.textContent=i;
+      }
+    })();
+
+    let currentUser = null;
+    let currentRoom = null;
+    let userName = 'Delegate';
+
+    // Chat rooms with sample messages
+    const rooms = [
+      { id: 'unsc-general', name: 'UNSC General', icon: '🏛️', members: 24, messages: [
+        {user:'Aryan S',text:'Has anyone looked at Res. 2254 for the Syria debate?',time:'2:30 PM'},
+        {user:'Priya M',text:'Yes! France\'s position is strong on humanitarian access',time:'2:32 PM'},
+        {user:'Rohan V',text:'Russia will veto anything too strong. Need a balanced clause',time:'2:35 PM'},
+      ]},
+      { id: 'unsc-western', name: 'Western Bloc', icon: '🌐', members: 8, messages: [
+        {user:'Dev P',text:'Coordinating on the preambulatory clauses for tomorrow',time:'1:15 PM'},
+        {user:'Ananya J',text:'France and UK should co-sponsor. Stronger together',time:'1:20 PM'},
+      ]},
+      { id: 'unga-climate', name: 'UNGA Climate Bloc', icon: '🌱', members: 31, messages: [
+        {user:'Kabir S',text:'The Paris Agreement reference should be in clause 1',time:'11:00 AM'},
+        {user:'Riya G',text:'Small island states need special mention in the resolution',time:'11:15 AM'},
+      ]},
+      { id: 'announcements', name: '📢 Announcements', icon: '📢', members: 247, messages: [
+        {user:'DelegateIQ',text:'Welcome to DelegateIQ! Network with delegates and build blocs here.',time:'9:00 AM'},
+        {user:'DelegateIQ',text:'Tip: Use AI Assistant to research your country position before chatting with your bloc!',time:'9:01 AM'},
+      ]},
+    ];
+
+    
+    function authReady() {
+      var s = document.getElementById('authLoadingScreen');
+      var g = document.getElementById('authGuardStyle');
+      if(s) s.style.display='none';
+      if(g) g.textContent='';
+    }
+    firebase.auth().onAuthStateChanged(user => {
+      if(!user){ window.location.replace('login.html'); return; }
+      var guard=document.getElementById('authGuard');
+      if(guard){ guard.style.opacity='0'; guard.style.transition='opacity 0.3s'; setTimeout(function(){guard.style.display='none';},300); }
+      currentUser = user;
+      let p={};try{p=JSON.parse(localStorage.getItem('diq_profile')||'{}');}catch(e){}
+      userName = p.displayName || user.displayName || user.email.split('@')[0];
+      const initials = p.initials || userName.substring(0,2).toUpperCase();
+      document.getElementById('sidebarName').textContent = userName;
+      document.getElementById('sidebarAvatar').textContent = initials;
+      renderRooms();
+    });
+
+    function renderRooms() {
+      document.getElementById('chatRooms').innerHTML = rooms.map(r => `
+        <div onclick="openRoom('${r.id}')" id="room-${r.id}" style="padding:14px 16px;border-bottom:1px solid var(--bg-warm);cursor:pointer;transition:background 0.2s;" onmouseover="this.style.background='var(--amber-pale)'" onmouseout="this.style.background='white'">
+          <div style="display:flex;align-items:center;gap:10px;">
+            <div style="width:38px;height:38px;background:var(--grad-warm);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;">${r.icon}</div>
+            <div style="flex:1;min-width:0;">
+              <div style="font-size:13px;font-weight:800;color:var(--text-primary);">${r.name}</div>
+              <div style="font-size:11px;color:var(--text-muted);font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${r.messages[r.messages.length-1].text}</div>
+            </div>
+            <div style="font-size:10px;color:var(--text-muted);font-weight:600;white-space:nowrap;">${r.members} members</div>
+          </div>
+        </div>`).join('');
+    }
+
+    window.openRoom = function(roomId) {
+      currentRoom = rooms.find(r => r.id === roomId);
+      if (!currentRoom) return;
+
+      // Highlight active room
+      document.querySelectorAll('[id^="room-"]').forEach(el => el.style.background = 'white');
+      document.getElementById('room-' + roomId).style.background = 'var(--amber-pale)';
+
+      document.getElementById('activeChatTitle').textContent = currentRoom.icon + ' ' + currentRoom.name;
+      document.getElementById('activeChatMeta').textContent = currentRoom.members + ' members';
+      document.getElementById('chatInputArea').style.display = 'block';
+
+      renderMessages();
+    };
+
+    function renderMessages() {
+      const msgs = document.getElementById('chatMessages');
+      msgs.innerHTML = currentRoom.messages.map(m => {
+        const isMe = m.user === userName;
+        return `
+          <div style="display:flex;gap:8px;align-items:flex-end;${isMe ? 'flex-direction:row-reverse;' : ''}">
+            <div style="width:28px;height:28px;background:${isMe ? 'var(--grad-warm)' : 'var(--bg-warm)'};border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;color:${isMe ? 'white' : 'var(--text-muted)'};flex-shrink:0;">${m.user.split(' ').map(n=>n[0]).join('').substring(0,2)}</div>
+            <div style="max-width:65%;">
+              ${!isMe ? `<div style="font-size:10px;color:var(--text-muted);font-weight:700;margin-bottom:3px;${isMe ? 'text-align:right;' : ''}">${m.user}</div>` : ''}
+              <div style="background:${isMe ? 'var(--grad-warm)' : 'white'};color:${isMe ? 'white' : 'var(--text-primary)'};padding:10px 13px;border-radius:${isMe ? '16px 4px 16px 16px' : '4px 16px 16px 16px'};font-size:13px;font-weight:600;border:${isMe ? 'none' : '1.5px solid var(--border)'};">${m.text}</div>
+              <div style="font-size:10px;color:var(--text-muted);margin-top:3px;${isMe ? 'text-align:right;' : ''}">${m.time}</div>
+            </div>
+          </div>`;
+      }).join('');
+      msgs.scrollTop = msgs.scrollHeight;
+    }
+
+    window.sendChatMsg = function() {
+      const input = document.getElementById('msgInput');
+      const text = input.value.trim();
+      if (!text || !currentRoom) return;
+
+      const now = new Date();
+      const time = now.toLocaleTimeString('en-IN', {hour:'2-digit', minute:'2-digit'});
+      currentRoom.messages.push({ user: userName, text, time });
+      input.value = '';
+      renderMessages();
+
+      // Award committee_join badge on first chat
+      try {
+        const p = JSON.parse(localStorage.getItem('diq_profile') || '{}');
+        if (!p.badges) p.badges = ['first_login'];
+        if (!p.badges.includes('committee_join')) {
+          p.badges.push('committee_join');
+          localStorage.setItem('diq_profile', JSON.stringify(p));
+        }
+      } catch(e){}
+    };
+
+    document.getElementById('logoutBtn').addEventListener('click', async () => {
+      await firebase.auth().signOut();
+      localStorage.removeItem('diq_profile'); localStorage.removeItem('diq_setup');
+      window.location.href='../index.html';
+    });
+  </script>
+</body>
+</html>

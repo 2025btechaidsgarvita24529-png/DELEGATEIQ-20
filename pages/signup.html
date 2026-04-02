@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Sign Up — DelegateIQ</title>
+  <link rel="stylesheet" href="../css/style.css"/>
+  <style>
+    body{min-height:100vh;display:flex;align-items:center;justify-content:center;background:#FAF7F2;padding:20px;}
+    .card{width:100%;max-width:420px;background:#fff;border:1.5px solid #E4DFD6;border-radius:22px;padding:32px 28px;box-shadow:0 8px 40px rgba(28,61,53,0.10);}
+    .brand{display:flex;align-items:center;gap:9px;margin-bottom:22px;}
+    .brand-mark{width:30px;height:30px;background:linear-gradient(135deg,#1C3D35,#2A5C52);border-radius:8px;display:flex;align-items:center;justify-content:center;}
+    .brand-mark svg{width:15px;height:15px;color:white;}
+    .brand-name{font-size:15px;font-weight:700;color:#1A2820;}
+    .tabs{display:flex;background:#F5F0E8;border:1px solid #E4DFD6;border-radius:9px;padding:3px;margin-bottom:20px;}
+    .tab{flex:1;text-align:center;padding:7px;border-radius:7px;font-size:13px;font-weight:600;color:#8A9E98;text-decoration:none;transition:all 0.12s;}
+    .tab.active{background:#fff;color:#1A2820;box-shadow:0 1px 4px rgba(0,0,0,0.08);}
+    .steps{display:flex;align-items:center;gap:6px;margin-bottom:18px;}
+    .sdot{width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;transition:all 0.2s;flex-shrink:0;}
+    .sdot.done{background:#1C3D35;color:white;}
+    .sdot.cur{background:#E8F0EE;border:2px solid #1C3D35;color:#1C3D35;}
+    .sdot.up{background:#F5F0E8;border:1px solid #E4DFD6;color:#A8B8B0;}
+    .sline{flex:1;height:1px;background:#E4DFD6;transition:background 0.2s;}
+    .sline.done{background:#1C3D35;}
+    h2.t{font-size:19px;font-weight:700;margin-bottom:3px;letter-spacing:-0.02em;}
+    p.s{font-size:13px;color:#7A8C84;margin-bottom:16px;}
+    .err{background:#FEF2F2;border:1px solid #FECACA;color:#DC2626;padding:9px 12px;border-radius:8px;font-size:13px;display:none;margin-bottom:12px;}
+    .err.show{display:block;}
+    .f{display:flex;flex-direction:column;gap:4px;margin-bottom:11px;}
+    .f label{font-size:10px;font-weight:700;color:#7A8C84;text-transform:uppercase;letter-spacing:0.07em;}
+    .f input{padding:9px 12px;background:#F5F0E8;border:1.5px solid #E4DFD6;border-radius:9px;font-size:14px;color:#1A2820;outline:none;font-family:inherit;transition:all 0.12s;width:100%;box-sizing:border-box;}
+    .f input:focus{border-color:#1C3D35;background:#fff;box-shadow:0 0 0 3px rgba(28,61,53,0.08);}
+    .f input::placeholder{color:#A8B8B0;}
+    .r2{display:grid;grid-template-columns:1fr 1fr;gap:9px;}
+    .pw-w{position:relative;}
+    .pw-w input{padding-right:38px;}
+    .pw-eye{position:absolute;right:11px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:#8A9E98;padding:3px;display:flex;align-items:center;}
+    .pw-bar{height:3px;background:#E4DFD6;border-radius:99px;margin-top:4px;overflow:hidden;}
+    .pw-fill{height:100%;border-radius:99px;width:0%;transition:all 0.2s;}
+    .pw-lbl{font-size:11px;font-weight:600;margin-top:2px;}
+    .pw-lbl.w{color:#B07070;}.pw-lbl.m{color:#E08040;}.pw-lbl.s{color:#4E8060;}
+    .chk{display:flex;align-items:flex-start;gap:7px;font-size:12px;color:#4A6058;cursor:pointer;margin-bottom:12px;}
+    .chk input{accent-color:#1C3D35;margin-top:2px;flex-shrink:0;}
+    .chk a{color:#1C3D35;font-weight:600;}
+    .btn{width:100%;padding:11px;border-radius:9px;border:none;cursor:pointer;background:linear-gradient(135deg,#1C3D35,#2A5C52);color:white;font-size:14px;font-weight:600;font-family:inherit;box-shadow:0 2px 8px rgba(28,61,53,0.22);transition:all 0.15s;margin-bottom:12px;}
+    .btn:hover{transform:translateY(-1px);box-shadow:0 4px 16px rgba(28,61,53,0.28);}
+    .btn:disabled{opacity:0.6;cursor:not-allowed;transform:none;}
+    .div{display:flex;align-items:center;gap:9px;color:#A8B8B0;font-size:12px;margin-bottom:12px;}
+    .div::before,.div::after{content:'';flex:1;height:1px;background:#E4DFD6;}
+    .gbtn{width:100%;padding:9px;border-radius:9px;border:1.5px solid #E4DFD6;background:#fff;font-size:13px;font-weight:600;color:#1A2820;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:7px;transition:all 0.12s;margin-bottom:14px;}
+    .gbtn:hover{border-color:#D0C9BE;background:#F5F0E8;}
+    .sw{text-align:center;font-size:13px;color:#8A9E98;}
+    .sw a{color:#1C3D35;font-weight:600;}
+    /* Step 2 */
+    .back-btn{background:none;border:none;cursor:pointer;color:#7A8C84;font-size:13px;font-weight:600;font-family:inherit;padding:0;display:flex;align-items:center;gap:5px;margin-bottom:14px;transition:color 0.12s;}
+    .back-btn:hover{color:#1A2820;}
+    .back-btn svg{width:13px;height:13px;}
+    .summary{background:#F5F0E8;border:1px solid #E4DFD6;border-radius:9px;padding:10px 13px;margin-bottom:16px;font-size:13px;color:#4A6058;}
+    .summary strong{color:#1A2820;}
+    .role-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px;}
+    .rc{border:2px solid #E4DFD6;border-radius:13px;padding:18px 12px;cursor:pointer;text-align:center;transition:all 0.15s;background:#F5F0E8;}
+    .rc:hover{border-color:#1C3D35;background:#fff;transform:translateY(-2px);box-shadow:0 4px 14px rgba(28,61,53,0.10);}
+    .rc.sel{border-color:#1C3D35;background:#fff;box-shadow:0 0 0 3px rgba(28,61,53,0.08),0 4px 14px rgba(28,61,53,0.08);}
+    .rc-icon{width:44px;height:44px;border-radius:11px;margin:0 auto 11px;display:flex;align-items:center;justify-content:center;background:#F5F0E8;border:1px solid #E4DFD6;transition:all 0.15s;}
+    .rc.sel .rc-icon{background:#1C3D35;border-color:#1C3D35;}
+    .rc-icon svg{width:21px;height:21px;color:#4A6058;transition:color 0.15s;}
+    .rc.sel .rc-icon svg{color:white;}
+    .rc h3{font-size:14px;font-weight:700;margin-bottom:5px;color:#1A2820;}
+    .rc p{font-size:11px;color:#7A8C84;line-height:1.45;}
+    .rc-tick{width:16px;height:16px;border-radius:50%;border:1.5px solid #E4DFD6;margin:10px auto 0;display:flex;align-items:center;justify-content:center;transition:all 0.15s;}
+    .rc.sel .rc-tick{background:#1C3D35;border-color:#1C3D35;}
+    .rc-tick svg{display:none;width:9px;height:9px;color:white;}
+    .rc.sel .rc-tick svg{display:block;}
+    .role-note{font-size:11px;color:#8A9E98;text-align:center;margin-bottom:14px;}
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="brand">
+      <div class="brand-mark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg></div>
+      <span class="brand-name">DelegateIQ</span>
+    </div>
+
+    <div class="tabs">
+      <a href="login.html" class="tab">Sign In</a>
+      <a href="signup.html" class="tab active">Sign Up</a>
+    </div>
+
+    <div class="steps">
+      <div class="sdot cur" id="d1">1</div>
+      <div class="sline" id="l1"></div>
+      <div class="sdot up" id="d2">2</div>
+    </div>
+
+    <div class="err" id="err"></div>
+
+    <!-- STEP 1 -->
+    <div id="s1">
+      <h2 class="t">Create your account</h2>
+      <p class="s">Free forever — no credit card required</p>
+      <div class="r2">
+        <div class="f"><label>First Name</label><input type="text" id="fn" placeholder="Garvita"/></div>
+        <div class="f"><label>Last Name</label><input type="text" id="ln" placeholder="Gupta"/></div>
+      </div>
+      <div class="f"><label>Email</label><input type="email" id="em" placeholder="you@school.edu"/></div>
+      <div class="f"><label>School <span style="color:#A8B8B0;font-size:10px;font-weight:400;text-transform:none;">(optional)</span></label><input type="text" id="sc" placeholder="Your institution"/></div>
+      <div class="f">
+        <label>Password</label>
+        <div class="pw-w">
+          <input type="password" id="pw" placeholder="Min 6 characters" oninput="chkPw(this.value)"/>
+          <button class="pw-eye" type="button" onclick="togPw()"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button>
+        </div>
+        <div class="pw-bar"><div class="pw-fill" id="pf"></div></div>
+        <span class="pw-lbl" id="pl"></span>
+      </div>
+      <label class="chk"><input type="checkbox" id="ag"/> I agree to the <a href="../terms.html" target="_blank">Terms</a> and <a href="../privacy.html" target="_blank">Privacy Policy</a></label>
+      <button class="btn" onclick="next()">Continue →</button>
+      <div class="div">or</div>
+      <button class="gbtn" type="button" onclick="doGoogle()">
+        <svg width="17" height="17" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+        Continue with Google
+      </button>
+      <p class="sw">Already have an account? <a href="login.html">Sign in</a></p>
+    </div>
+
+    <!-- STEP 2 -->
+    <div id="s2" style="display:none;">
+      <button class="back-btn" onclick="back()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg> Back</button>
+      <h2 class="t">How will you use DelegateIQ?</h2>
+      <p class="s" style="margin-bottom:14px;">Choose your role — you can switch anytime after signing in.</p>
+      <div class="summary">Creating account for <strong id="sum-name"></strong> &bull; <strong id="sum-email"></strong></div>
+      <div class="role-grid">
+        <div class="rc sel" id="rd" onclick="setRole('delegate')">
+          <div class="rc-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>
+          <h3>Delegate</h3>
+          <p>I participate in MUN conferences and want AI tools, research, and badges.</p>
+          <div class="rc-tick"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div>
+        </div>
+        <div class="rc" id="ro" onclick="setRole('organizer')">
+          <div class="rc-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>
+          <h3>Organizer</h3>
+          <p>I run or manage MUN events and want to post announcements and manage committees.</p>
+          <div class="rc-tick"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div>
+        </div>
+      </div>
+      <p class="role-note">You can always switch roles from the sidebar after signing in.</p>
+      <button class="btn" id="createBtn" onclick="doSignup()">Create Account</button>
+    </div>
+  </div>
+
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+  <script>
+    const fc={apiKey:"AIzaSyCqNmnpQRg5uUYu4Pp_k0k90wNBmJxpuH0",authDomain:"delegate-iq-2025.firebaseapp.com",projectId:"delegate-iq-2025",storageBucket:"delegate-iq-2025.firebasestorage.app",messagingSenderId:"612696020579",appId:"1:612696020579:web:90255861a0d531f2580a56"};
+    if(!firebase.apps.length) firebase.initializeApp(fc);
+    const auth=firebase.auth();
+    let role='delegate';
+
+    function err(msg){const e=document.getElementById('err');e.textContent=msg;e.classList.add('show');e.scrollIntoView({behavior:'smooth',block:'nearest'});}
+    function clearErr(){document.getElementById('err').classList.remove('show');}
+
+    window.chkPw=function(v){
+      const f=document.getElementById('pf'),l=document.getElementById('pl');
+      if(!v){f.style.width='0%';l.textContent='';return;}
+      if(v.length<6){f.style.width='30%';f.style.background='#B07070';l.textContent='Too short';l.className='pw-lbl w';}
+      else if(v.length<10){f.style.width='65%';f.style.background='#E08040';l.textContent='Medium';l.className='pw-lbl m';}
+      else{f.style.width='100%';f.style.background='#4E8060';l.textContent='Strong';l.className='pw-lbl s';}
+    };
+
+    window.togPw=function(){const i=document.getElementById('pw');i.type=i.type==='password'?'text':'password';};
+
+    window.next=function(){
+      clearErr();
+      const fn=document.getElementById('fn').value.trim();
+      const em=document.getElementById('em').value.trim();
+      const pw=document.getElementById('pw').value;
+      const ag=document.getElementById('ag').checked;
+      if(!fn){err('Please enter your first name.');return;}
+      if(!em||!em.includes('@')){err('Please enter a valid email address.');return;}
+      if(!pw||pw.length<6){err('Password must be at least 6 characters.');return;}
+      if(!ag){err('Please agree to the Terms and Privacy Policy.');return;}
+      // Go to step 2
+      document.getElementById('d1').className='sdot done';
+      document.getElementById('d1').innerHTML='<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>';
+      document.getElementById('l1').className='sline done';
+      document.getElementById('d2').className='sdot cur';
+      const ln=document.getElementById('ln').value.trim();
+      document.getElementById('sum-name').textContent=fn+(ln?' '+ln:'');
+      document.getElementById('sum-email').textContent=em;
+      document.getElementById('s1').style.display='none';
+      document.getElementById('s2').style.display='block';
+    };
+
+    window.back=function(){
+      document.getElementById('d1').className='sdot cur';
+      document.getElementById('d1').textContent='1';
+      document.getElementById('l1').className='sline';
+      document.getElementById('d2').className='sdot up';
+      document.getElementById('s2').style.display='none';
+      document.getElementById('s1').style.display='block';
+    };
+
+    window.setRole=function(r){
+      role=r;
+      document.getElementById('rd').classList.toggle('sel',r==='delegate');
+      document.getElementById('ro').classList.toggle('sel',r==='organizer');
+    };
+
+    window.doSignup=async function(){
+      const fn=document.getElementById('fn').value.trim();
+      const ln=document.getElementById('ln').value.trim();
+      const em=document.getElementById('em').value.trim();
+      const pw=document.getElementById('pw').value;
+      const sc=document.getElementById('sc').value.trim();
+      const btn=document.getElementById('createBtn');
+      btn.textContent='Creating account...';btn.disabled=true;
+      try{
+        const dn=fn+(ln?' '+ln:'');
+        const c=await auth.createUserWithEmailAndPassword(em,pw);
+        await c.user.updateProfile({displayName:dn});
+        localStorage.setItem('diq_profile',JSON.stringify({
+          displayName:dn,firstName:fn,lastName:ln,email:em,school:sc,
+          initials:(fn[0]+(ln?ln[0]:(fn[1]||''))).toUpperCase(),
+          role:role,badges:['first_login'],conferences:[],researchCount:0,
+          joinedAt:new Date().toISOString()
+        }));
+        window.location.href='dashboard.html';
+      }catch(e){
+        btn.textContent='Create Account';btn.disabled=false;
+        const msgs={'auth/email-already-in-use':'This email is already registered. Try signing in.','auth/invalid-email':'Please enter a valid email.','auth/weak-password':'Password is too weak.'};
+        err(msgs[e.code]||e.message);
+        back();
+      }
+    };
+
+    window.doGoogle=async function(){
+      try{
+        const p=new firebase.auth.GoogleAuthProvider();
+        const c=await auth.signInWithPopup(p);
+        const name=c.user.displayName||c.user.email.split('@')[0];
+        const pts=name.split(' ');
+        if(!localStorage.getItem('diq_profile')){
+          localStorage.setItem('diq_profile',JSON.stringify({
+            displayName:name,firstName:pts[0],lastName:pts.slice(1).join(' '),
+            email:c.user.email,school:'',
+            initials:(pts[0][0]+(pts[1]?pts[1][0]:pts[0][1]||'')).toUpperCase(),
+            role:'delegate',badges:['first_login'],conferences:[],researchCount:0,
+            joinedAt:new Date().toISOString()
+          }));
+        }
+        window.location.href='dashboard.html';
+      }catch(e){err(e.message);}
+    };
+  </script>
+</body>
+</html>

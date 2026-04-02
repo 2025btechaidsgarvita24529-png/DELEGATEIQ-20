@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Resolutions — DelegateIQ</title>
+  <link rel="stylesheet" href="../css/style.css"/>
+<style>
+  /* Auth Guard Overlay */
+  #authGuard {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100vw; height: 100vh;
+    background: #FAF7F2;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: 16px;
+    z-index: 99999;
+  }
+  #authGuard .ag-logo {
+    width: 56px; height: 56px;
+    background: #D97706;
+    border-radius: 14px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 28px; font-weight: 900; color: white;
+    font-family: 'Trebuchet MS', sans-serif;
+    animation: agPulse 1.5s ease-in-out infinite;
+  }
+  #authGuard p {
+    font-size: 14px; font-weight: 600;
+    color: #8B7355;
+    font-family: 'Nunito', sans-serif;
+  }
+  @keyframes agPulse {
+    0%, 100% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(0.95); opacity: 0.8; }
+  }
+</style>
+</head>
+<body class="app-page">
+  <!-- AUTH GUARD -->
+  <style id="authGuardStyle">
+    body.app-page .main-content, body.app-page aside.sidebar { visibility:hidden !important; }
+    #authLoadingScreen { position:fixed;top:0;left:0;width:100%;height:100%;background:#FAF7F2;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:9999; }
+    .auth-spinner { width:44px;height:44px;border:3px solid #E8DFD0;border-top-color:#D97706;border-radius:50%;animation:authspin 0.8s linear infinite;margin-bottom:16px; }
+    @keyframes authspin { to { transform:rotate(360deg); } }
+    .auth-logo-txt { font-size:28px;font-weight:900;color:#1A1008;font-family:Trebuchet MS; }
+    .auth-sub-txt { font-size:13px;color:#8B7355;font-weight:600;margin-top:6px; }
+  </style>
+  <div id="authLoadingScreen">
+    <div class="auth-spinner"></div>
+    <div class="auth-logo-txt">DelegateIQ</div>
+    <div class="auth-sub-txt">Verifying your session...</div>
+  </div>
+  <!-- Auth Guard Overlay - hidden after auth check -->
+  <div id="authGuard">
+    <div class="ag-logo">D</div>
+    <p>Verifying your session...</p>
+  </div>
+
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-logo"><div class="logo-mark">D</div><span class="logo-text">DelegateIQ</span></div>
+    <nav class="sidebar-nav">
+      <div class="nav-section-label">Main</div>
+      <a href="dashboard.html" class="nav-item"><span class="nav-icon">🏠</span><span>Dashboard</span></a>
+      <a href="ai-chat.html" class="nav-item"><span class="nav-icon">🤖</span><span>AI Assistant</span></a>
+      <a href="research.html" class="nav-item"><span class="nav-icon">🔍</span><span>Research</span></a>
+      <a href="resolutions.html" class="nav-item active"><span class="nav-icon">📜</span><span>Resolutions</span></a>
+      <div class="nav-section-label">Community</div>
+      <a href="network.html" class="nav-item"><span class="nav-icon">👥</span><span>Network</span></a>
+      <a href="chats.html" class="nav-item"><span class="nav-icon">💬</span><span>Chats</span></a>
+      <div class="nav-section-label">You</div>
+      <a href="profile.html" class="nav-item"><span class="nav-icon">👤</span><span>Profile</span></a>
+      <a href="profile.html" class="nav-item"><span class="nav-icon">🏅</span><span>Badges</span></a>
+    </nav>
+    <div class="sidebar-bottom">
+      <div class="sidebar-user" onclick="location.href='profile.html'">
+        <div class="avatar-btn" id="sidebarAvatar">?</div>
+        <div><div class="sidebar-user-name" id="sidebarName">You</div><div class="sidebar-user-role" id="sidebarSchool">Member</div></div>
+      </div>
+      <a href="#" class="nav-item" id="logoutBtn"><span class="nav-icon">🚪</span><span>Logout</span></a>
+    </div>
+  </aside>
+
+  <main class="main-content">
+    <header class="app-header">
+      <button class="sidebar-toggle" onclick="document.getElementById('sidebar').classList.toggle('open')">☰</button>
+      <h2>📜 Resolution Drafter</h2>
+      <div class="header-right">
+        <div class="avatar-btn" id="headerAvatar">?</div>
+      </div>
+    </header>
+
+    <div style="padding:24px;">
+      <div style="background:linear-gradient(135deg,var(--amber-pale),var(--terra-pale));border:1.5px solid var(--amber-soft);border-radius:var(--r-xl);padding:28px;margin-bottom:24px;">
+        <h2 style="font-size:22px;font-weight:900;margin-bottom:6px;">Draft Your Resolution</h2>
+        <p style="color:var(--text-secondary);font-size:14px;font-weight:600;">Build preambulatory and operative clauses in proper MUN format. Copy anytime.</p>
+      </div>
+
+      <div style="background:white;border:1.5px solid var(--border);border-radius:var(--r-lg);padding:16px 20px;margin-bottom:20px;display:flex;align-items:center;gap:16px;flex-wrap:wrap;">
+        <span style="font-size:13px;font-weight:700;color:var(--text-secondary);">Your context:</span>
+        <span class="badge-chip chip-green" id="ctxCommittee">No committee set</span>
+        <span class="badge-chip chip-violet" id="ctxCountry">No country set</span>
+        <span class="badge-chip" style="background:var(--bg-soft);color:var(--text-muted);" id="ctxTopic">No topic set</span>
+        <a href="dashboard.html" style="font-size:12px;color:var(--amber);font-weight:700;margin-left:auto;">Change →</a>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:24px;">
+        <!-- PREAMBULATORY -->
+        <div style="background:white;border:1.5px solid var(--border);border-radius:var(--r-xl);padding:22px;">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+            <h3 style="font-size:15px;font-weight:800;">Preambulatory Clauses</h3>
+            <span style="font-size:11px;color:var(--text-muted);font-weight:600;">End with comma</span>
+          </div>
+          <select id="preambSelect" style="width:100%;padding:10px 12px;background:var(--bg-soft);border:1.5px solid var(--border);border-radius:var(--r-md);font-size:13px;font-family:'Nunito',sans-serif;color:var(--text-primary);margin-bottom:10px;outline:none;">
+            <option value="">Choose signal word...</option>
+          </select>
+          <textarea id="preambText" placeholder="...the relevant context..." rows="2" style="width:100%;padding:10px 12px;background:var(--bg-soft);border:1.5px solid var(--border);border-radius:var(--r-md);font-size:13px;font-family:'Nunito',sans-serif;resize:vertical;outline:none;margin-bottom:10px;box-sizing:border-box;"></textarea>
+          <button class="btn-primary" style="font-size:12px;padding:8px 16px;border-radius:var(--r-full);width:100%;" onclick="addClause('preamb')">+ Add Clause</button>
+          <div id="preambList" style="margin-top:14px;display:flex;flex-direction:column;gap:8px;"></div>
+        </div>
+
+        <!-- OPERATIVE -->
+        <div style="background:white;border:1.5px solid var(--border);border-radius:var(--r-xl);padding:22px;">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+            <h3 style="font-size:15px;font-weight:800;">Operative Clauses</h3>
+            <span style="font-size:11px;color:var(--text-muted);font-weight:600;">End with semicolon</span>
+          </div>
+          <select id="operSelect" style="width:100%;padding:10px 12px;background:var(--bg-soft);border:1.5px solid var(--border);border-radius:var(--r-md);font-size:13px;font-family:'Nunito',sans-serif;color:var(--text-primary);margin-bottom:10px;outline:none;">
+            <option value="">Choose signal word...</option>
+          </select>
+          <textarea id="operText" placeholder="...all member states to cooperate..." rows="2" style="width:100%;padding:10px 12px;background:var(--bg-soft);border:1.5px solid var(--border);border-radius:var(--r-md);font-size:13px;font-family:'Nunito',sans-serif;resize:vertical;outline:none;margin-bottom:10px;box-sizing:border-box;"></textarea>
+          <button class="btn-primary" style="font-size:12px;padding:8px 16px;border-radius:var(--r-full);width:100%;" onclick="addClause('oper')">+ Add Clause</button>
+          <div id="operList" style="margin-top:14px;display:flex;flex-direction:column;gap:8px;"></div>
+        </div>
+      </div>
+
+      <!-- PREVIEW -->
+      <div style="background:white;border:1.5px solid var(--border);border-radius:var(--r-xl);padding:22px;margin-bottom:20px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+          <h3 style="font-size:15px;font-weight:800;">Resolution Preview</h3>
+          <div style="display:flex;gap:8px;">
+            <button class="btn-ghost-sm" onclick="copyResolution()">📋 Copy Full</button>
+            <button class="btn-ghost-sm" onclick="clearAll()" style="color:var(--terracotta);border-color:var(--terracotta);">🗑️ Clear</button>
+          </div>
+        </div>
+        <div id="resolutionPreview" style="font-size:13px;color:var(--text-secondary);line-height:1.8;font-weight:600;min-height:80px;">
+          <em style="color:var(--text-muted);">Add clauses above to build your resolution...</em>
+        </div>
+      </div>
+
+      <div style="background:var(--amber-pale);border:1.5px solid var(--amber-soft);border-radius:var(--r-lg);padding:18px;">
+        <h4 style="font-size:13px;font-weight:800;color:var(--amber);margin-bottom:8px;">Quick Tips</h4>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+          <p style="font-size:12px;color:var(--text-secondary);font-weight:600;">Preambulatory clauses provide context and justification</p>
+          <p style="font-size:12px;color:var(--text-secondary);font-weight:600;">Operative clauses are the actual actions being proposed</p>
+          <p style="font-size:12px;color:var(--text-secondary);font-weight:600;">Start broad (existing resolutions) then narrow to your issue</p>
+          <p style="font-size:12px;color:var(--text-secondary);font-weight:600;">Last operative clause ends with period, others with semicolons</p>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+  <script>
+    var fc={apiKey:"AIzaSyCqNmnpQRg5uUYu4Pp_k0k90wNBmJxpuH0",authDomain:"delegate-iq-2025.firebaseapp.com",projectId:"delegate-iq-2025",storageBucket:"delegate-iq-2025.firebasestorage.app",messagingSenderId:"612696020579",appId:"1:612696020579:web:90255861a0d531f2580a56"};
+    if(!firebase.apps.length) firebase.initializeApp(fc);
+
+    // Load sidebar instantly
+    var p={};try{p=JSON.parse(localStorage.getItem('diq_profile')||'{}');}catch(e){}
+    var s={};try{s=JSON.parse(localStorage.getItem('diq_setup')||'{}');}catch(e){}
+    if(p.displayName){
+      var i=p.initials||p.displayName.substring(0,2).toUpperCase();
+      document.getElementById('sidebarAvatar').textContent=i;
+      document.getElementById('sidebarName').textContent=p.displayName;
+      document.getElementById('sidebarSchool').textContent=p.school||'Member';
+      document.getElementById('headerAvatar').textContent=i;
+    }
+    if(s.committee) document.getElementById('ctxCommittee').textContent='🏛️ '+s.committee;
+    if(s.country) document.getElementById('ctxCountry').textContent='🌍 '+s.country;
+    if(s.topic) document.getElementById('ctxTopic').textContent=s.topic;
+
+    
+    function authReady() {
+      var s = document.getElementById('authLoadingScreen');
+      var g = document.getElementById('authGuardStyle');
+      if(s) s.style.display='none';
+      if(g) g.textContent='';
+    }
+    firebase.auth().onAuthStateChanged(function(user){
+      if(!user){ window.location.replace('login.html'); return; }
+      var guard=document.getElementById('authGuard');
+      if(guard){ guard.style.opacity='0'; guard.style.transition='opacity 0.3s'; setTimeout(function(){guard.style.display='none';},300); }
+      if(!p.displayName&&user.displayName){
+        var i=user.displayName.substring(0,2).toUpperCase();
+        document.getElementById('sidebarAvatar').textContent=i;
+        document.getElementById('sidebarName').textContent=user.displayName;
+        document.getElementById('headerAvatar').textContent=i;
+      }
+      // Award drafter badge
+      var pr=p;
+      if(!pr.badges) pr.badges=['first_login'];
+      if(!pr.badges.includes('resolution_draft')){
+        pr.badges.push('resolution_draft');
+        localStorage.setItem('diq_profile',JSON.stringify(pr));
+      }
+    });
+
+    // Populate dropdowns properly via JS — no template literals in HTML
+    var preambWords=['Recalling','Reaffirming','Deeply concerned by','Recognizing','Noting with appreciation','Bearing in mind','Convinced that','Aware of','Emphasizing','Welcoming'];
+    var operWords=['Urges','Calls upon','Encourages','Condemns','Requests','Affirms','Decides','Recommends','Demands','Invites'];
+
+    var ps=document.getElementById('preambSelect');
+    var os=document.getElementById('operSelect');
+    preambWords.forEach(function(w){var o=document.createElement('option');o.value=w;o.textContent=w;ps.appendChild(o);});
+    operWords.forEach(function(w){var o=document.createElement('option');o.value=w;o.textContent=w;os.appendChild(o);});
+
+    var preambClauses=[], operClauses=[];
+
+    window.addClause=function(type){
+      if(type==='preamb'){
+        var word=document.getElementById('preambSelect').value;
+        var text=document.getElementById('preambText').value.trim();
+        if(!word||!text){alert('Please select a signal word and enter clause text!');return;}
+        preambClauses.push({word:word,text:text});
+        document.getElementById('preambSelect').value='';
+        document.getElementById('preambText').value='';
+      } else {
+        var word=document.getElementById('operSelect').value;
+        var text=document.getElementById('operText').value.trim();
+        if(!word||!text){alert('Please select a signal word and enter clause text!');return;}
+        operClauses.push({word:word,text:text});
+        document.getElementById('operSelect').value='';
+        document.getElementById('operText').value='';
+      }
+      renderClauses();
+      updatePreview();
+    };
+
+    function renderClauses(){
+      var pl=document.getElementById('preambList');
+      pl.innerHTML='';
+      preambClauses.forEach(function(c,i){
+        var d=document.createElement('div');
+        d.style.cssText='background:var(--bg-soft);border:1px solid var(--border);border-radius:var(--r-md);padding:10px 12px;display:flex;align-items:flex-start;gap:8px;';
+        d.innerHTML='<div style="flex:1;font-size:12px;font-weight:600;"><strong style="color:var(--amber);">'+c.word+'</strong> '+c.text+',</div><button onclick="removeClause(\'preamb\','+i+')" style="background:none;border:none;cursor:pointer;font-size:14px;color:var(--text-muted);">✕</button>';
+        pl.appendChild(d);
+      });
+      var ol=document.getElementById('operList');
+      ol.innerHTML='';
+      operClauses.forEach(function(c,i){
+        var d=document.createElement('div');
+        d.style.cssText='background:var(--bg-soft);border:1px solid var(--border);border-radius:var(--r-md);padding:10px 12px;display:flex;align-items:flex-start;gap:8px;';
+        d.innerHTML='<div style="flex:1;font-size:12px;font-weight:600;"><strong style="color:var(--terracotta);">'+(i+1)+'. '+c.word+'</strong> '+c.text+(i===operClauses.length-1?'.':';')+'</div><button onclick="removeClause(\'oper\','+i+')" style="background:none;border:none;cursor:pointer;font-size:14px;color:var(--text-muted);">✕</button>';
+        ol.appendChild(d);
+      });
+    }
+
+    window.removeClause=function(type,i){
+      if(type==='preamb') preambClauses.splice(i,1);
+      else operClauses.splice(i,1);
+      renderClauses(); updatePreview();
+    };
+
+    function updatePreview(){
+      if(!preambClauses.length&&!operClauses.length){
+        document.getElementById('resolutionPreview').innerHTML='<em style="color:var(--text-muted);">Add clauses above to build your resolution...</em>';
+        return;
+      }
+      var html='';
+      preambClauses.forEach(function(c){html+='<p style="margin-bottom:8px;"><strong style="color:var(--amber);">'+c.word+'</strong> '+c.text+',</p>';});
+      if(preambClauses.length&&operClauses.length) html+='<div style="height:12px;"></div>';
+      operClauses.forEach(function(c,i){html+='<p style="margin-bottom:8px;"><strong style="color:var(--terracotta);">'+(i+1)+'. '+c.word+'</strong> '+c.text+(i===operClauses.length-1?'.':';')+'</p>';});
+      document.getElementById('resolutionPreview').innerHTML=html;
+    }
+
+    window.copyResolution=function(){
+      var text='';
+      preambClauses.forEach(function(c){text+=c.word+' '+c.text+',\n';});
+      if(preambClauses.length) text+='\n';
+      operClauses.forEach(function(c,i){text+=(i+1)+'. '+c.word+' '+c.text+(i===operClauses.length-1?'.\n':';\n');});
+      if(!text){alert('Add some clauses first!');return;}
+      navigator.clipboard.writeText(text);
+      event.target.textContent='✅ Copied!';
+      setTimeout(function(){event.target.textContent='📋 Copy Full';},2000);
+    };
+
+    window.clearAll=function(){
+      if(confirm('Clear all clauses?')){preambClauses=[];operClauses=[];renderClauses();updatePreview();}
+    };
+
+    document.getElementById('logoutBtn').addEventListener('click',function(){
+      firebase.auth().signOut();
+      localStorage.removeItem('diq_profile');localStorage.removeItem('diq_setup');
+      window.location.href='../index.html';
+    });
+    document.addEventListener('click',function(e){
+      var sb=document.getElementById('sidebar'),tg=document.querySelector('.sidebar-toggle');
+      if(sb.classList.contains('open')&&!sb.contains(e.target)&&!tg.contains(e.target)) sb.classList.remove('open');
+    });
+  </script>
+</body>
+</html>
