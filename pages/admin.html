@@ -3,256 +3,535 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Admin — DelegateIQ</title>
+  <title>Admin Panel — DelegateIQ</title>
   <link rel="stylesheet" href="../css/style.css"/>
-</head>
-<body class="app-page">
-  <div id="authGuard" style="position:fixed;top:0;left:0;width:100vw;height:100vh;background:#FAF8F4;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:16px;z-index:99999;">
-    <div style="width:56px;height:56px;background:linear-gradient(135deg,#1B3A35,#2D5A52);border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:900;color:white;">D</div>
-    <p style="font-size:14px;font-weight:600;color:#8A9E98;font-family:'Nunito',sans-serif;">Verifying admin access...</p>
-  </div>
+  <style>
+    /* Admin specific overrides */
+    .admin-sidebar { background: #0F2420; }
+    .admin-sidebar .sidebar-brand-mark { background: #B07070; }
+    .admin-sidebar .nav-section { color: rgba(255,255,255,0.25); }
+    .admin-role-tag { font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;padding:2px 8px;border-radius:99px;background:rgba(176,112,112,0.25);color:#C98880;margin-left:auto; }
 
-  <aside class="sidebar" id="sidebar">
-    <div class="sidebar-logo"><div class="logo-mark" style="background:var(--rosy);">D</div><span class="logo-text">DelegateIQ Admin</span></div>
-    <nav class="sidebar-nav">
-      <div class="nav-section-label">Admin</div>
-      <a href="admin.html" class="nav-item active"><span class="nav-icon">📊</span><span>Dashboard</span></a>
-      <a href="#" class="nav-item" onclick="showSection('announcements')"><span class="nav-icon">📢</span><span>Announcements</span></a>
-      <a href="#" class="nav-item" onclick="showSection('committees')"><span class="nav-icon">🏛️</span><span>Committees</span></a>
-      <a href="#" class="nav-item" onclick="showSection('users')"><span class="nav-icon">👥</span><span>Users</span></a>
-      <div class="nav-section-label">App</div>
-      <a href="dashboard.html" class="nav-item"><span class="nav-icon">🔙</span><span>Back to App</span></a>
-    </nav>
-    <div class="sidebar-bottom">
-      <div class="sidebar-user">
-        <div class="avatar-btn" id="sidebarAvatar">A</div>
-        <div><div class="sidebar-user-name" id="sidebarName">Admin</div><div class="sidebar-user-role">Administrator</div></div>
+    /* Stats */
+    .org-stats { display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:22px; }
+    .org-stat { background:#fff;border:1px solid #D8E5E0;border-radius:14px;padding:18px 20px; }
+    .org-stat-val { font-size:2rem;font-weight:700;color:#1C3D35;line-height:1;margin-bottom:4px;font-family:'DM Serif Display',Georgia,serif; }
+    .org-stat-lbl { font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:#7A8C84; }
+    .org-stat-trend { font-size:11px;color:#4E8060;margin-top:3px; }
+
+    /* Section card */
+    .sec-card { background:#fff;border:1px solid #D8E5E0;border-radius:16px;overflow:hidden;margin-bottom:18px; }
+    .sec-head { display:flex;align-items:center;justify-content:space-between;padding:15px 20px;border-bottom:1px solid #D8E5E0;background:#FAFAF8; }
+    .sec-head h3 { font-size:14px;font-weight:700;color:#1A2820; }
+    .sec-body { padding:18px 20px; }
+
+    /* Announcement form */
+    .ann-form { display:flex;flex-direction:column;gap:12px; }
+    .ann-field { display:flex;flex-direction:column;gap:4px; }
+    .ann-field label { font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:#7A8C84; }
+    .ann-field input, .ann-field textarea, .ann-field select {
+      padding:9px 12px;background:#F5F0E8;border:1.5px solid #D8E5E0;border-radius:9px;
+      font-size:13px;color:#1A2820;outline:none;font-family:inherit;transition:all 0.12s;
+    }
+    .ann-field input:focus, .ann-field textarea:focus, .ann-field select:focus {
+      border-color:#1C3D35;background:#fff;box-shadow:0 0 0 3px rgba(28,61,53,0.07);
+    }
+    .ann-field textarea { resize:vertical;min-height:70px; }
+    .type-pills { display:flex;gap:6px;flex-wrap:wrap; }
+    .type-pill { padding:5px 12px;border-radius:99px;border:1.5px solid #D8E5E0;font-size:12px;font-weight:600;cursor:pointer;transition:all 0.12s;background:#F5F0E8;color:#7A8C84;font-family:inherit; }
+    .type-pill.on { border-color:#1C3D35;background:#E8F0EE;color:#1C3D35; }
+    .post-btn { padding:9px 20px;background:linear-gradient(135deg,#1C3D35,#2A5C52);color:white;border:none;border-radius:9px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;transition:all 0.15s; }
+    .post-btn:hover { transform:translateY(-1px);box-shadow:0 3px 12px rgba(28,61,53,0.25); }
+
+    /* Posted announcements list */
+    .ann-list-item { display:flex;align-items:flex-start;gap:12px;padding:13px 0;border-bottom:1px solid #F0EDE8; }
+    .ann-list-item:last-child { border-bottom:none; }
+    .ann-type-dot { width:8px;height:8px;border-radius:50%;flex-shrink:0;margin-top:4px; }
+    .ann-type-dot.info { background:#4E8060; }
+    .ann-type-dot.event { background:#1C3D35; }
+    .ann-type-dot.deadline { background:#B07070; }
+    .ann-type-dot.award { background:#2A5C52; }
+    .ann-list-title { font-size:13px;font-weight:600;color:#1A2820;margin-bottom:2px; }
+    .ann-list-body { font-size:12px;color:#4A6058;line-height:1.5;margin-bottom:3px; }
+    .ann-list-meta { font-size:11px;color:#A8B8B0; }
+    .ann-del-btn { background:none;border:none;cursor:pointer;color:#A8B8B0;font-size:15px;padding:2px;margin-left:auto;flex-shrink:0;transition:color 0.12s; }
+    .ann-del-btn:hover { color:#B07070; }
+
+    /* Committee chips */
+    .comm-chips { display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px; }
+    .comm-chip { display:flex;align-items:center;gap:6px;padding:5px 12px;border-radius:8px;background:#F5F0E8;border:1px solid #D8E5E0;font-size:12px;font-weight:600;color:#1A2820; }
+    .comm-chip button { background:none;border:none;cursor:pointer;color:#A8B8B0;font-size:14px;padding:0;line-height:1;transition:color 0.12s; }
+    .comm-chip button:hover { color:#B07070; }
+    .add-comm-row { display:flex;gap:8px; }
+    .add-comm-input { flex:1;padding:8px 11px;background:#F5F0E8;border:1.5px solid #D8E5E0;border-radius:9px;font-size:13px;color:#1A2820;outline:none;font-family:inherit; }
+    .add-comm-input:focus { border-color:#1C3D35;background:#fff; }
+    .add-comm-btn { padding:8px 16px;background:#1C3D35;color:white;border:none;border-radius:9px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;transition:all 0.12s; }
+    .add-comm-btn:hover { background:#2A5C52; }
+
+    /* Users list */
+    .user-row { display:flex;align-items:center;gap:12px;padding:11px 0;border-bottom:1px solid #F0EDE8; }
+    .user-row:last-child { border-bottom:none; }
+    .user-av { width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,#1C3D35,#2A5C52);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:white;flex-shrink:0; }
+    .user-name { font-size:13px;font-weight:600;color:#1A2820; }
+    .user-meta { font-size:11px;color:#7A8C84; }
+    .user-role-badge { font-size:10px;font-weight:700;padding:2px 8px;border-radius:99px;margin-left:auto; }
+    .urb-delegate { background:#E8F0EE;color:#4E8060; }
+    .urb-organizer { background:#F5E8E8;color:#B07070; }
+
+    /* Certificate preview */
+    .cert-preview {
+      background:linear-gradient(135deg,#1C3D35,#2A5C52);
+      border-radius:16px;padding:32px;text-align:center;color:white;
+      position:relative;overflow:hidden;max-width:480px;margin:0 auto;
+    }
+    .cert-preview::before { content:'';position:absolute;top:-60px;right:-60px;width:200px;height:200px;border-radius:50%;background:rgba(255,255,255,0.05); }
+    .cert-preview::after { content:'';position:absolute;bottom:-40px;left:-40px;width:160px;height:160px;border-radius:50%;background:rgba(176,112,112,0.12); }
+    .cert-logo { width:44px;height:44px;background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.2);border-radius:11px;display:flex;align-items:center;justify-content:center;margin:0 auto 14px;position:relative;z-index:1; }
+    .cert-logo svg { width:22px;height:22px;color:white; }
+    .cert-issuer { font-size:10px;text-transform:uppercase;letter-spacing:0.12em;color:rgba(255,255,255,0.4);margin-bottom:4px;position:relative;z-index:1; }
+    .cert-title-text { font-family:'DM Serif Display',Georgia,serif;font-size:22px;font-style:italic;margin-bottom:10px;position:relative;z-index:1; }
+    .cert-name-text { font-size:18px;font-weight:700;margin-bottom:4px;position:relative;z-index:1; }
+    .cert-detail-text { font-size:12px;color:rgba(255,255,255,0.55);margin-bottom:18px;position:relative;z-index:1; }
+    .cert-seal { display:inline-block;padding:5px 16px;border-radius:99px;border:1px solid rgba(255,255,255,0.2);background:rgba(255,255,255,0.08);font-size:11px;font-weight:600;position:relative;z-index:1;margin-bottom:14px; }
+    .cert-print-btn { background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.25);color:white;padding:7px 18px;border-radius:99px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;position:relative;z-index:1;transition:all 0.12s; }
+    .cert-print-btn:hover { background:rgba(255,255,255,0.22); }
+
+    /* Active section highlight */
+    .nav-item.sec-active { color:white!important;background:rgba(255,255,255,0.15)!important;font-weight:700!important; }
+
+    @media(max-width:768px){.org-stats{grid-template-columns:1fr 1fr;}}
+  </style>
+</head>
+<body>
+<div id="ag" style="position:fixed;inset:0;z-index:9999;background:#FAF8F4;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;">
+  <div style="width:44px;height:44px;background:linear-gradient(135deg,#1C3D35,#2A5C52);border-radius:11px;display:flex;align-items:center;justify-content:center;">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+  </div>
+  <p style="font-size:13px;color:#7A8C84;font-family:inherit;">Loading admin panel...</p>
+</div>
+
+<div class="app" id="appShell" style="display:none;">
+  <aside class="sidebar admin-sidebar" id="sidebar">
+    <div class="sidebar-brand" style="border-bottom:1px solid rgba(255,255,255,0.07);">
+      <div class="sidebar-brand-mark" style="background:#B07070;">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
       </div>
-      <a href="#" class="nav-item" id="logoutBtn"><span class="nav-icon">🚪</span><span>Logout</span></a>
+      <span class="sidebar-brand-name">DelegateIQ</span>
+      <span class="admin-role-tag">Admin</span>
+    </div>
+
+    <nav class="sidebar-nav">
+      <div class="nav-section">Overview</div>
+      <a href="#" class="nav-item sec-active" id="nav-overview" onclick="showSection('overview',this)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>Dashboard
+      </a>
+
+      <div class="nav-section">Manage</div>
+      <a href="#" class="nav-item" id="nav-announcements" onclick="showSection('announcements',this)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>Announcements
+      </a>
+      <a href="#" class="nav-item" id="nav-committees" onclick="showSection('committees',this)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>Committees
+      </a>
+      <a href="#" class="nav-item" id="nav-users" onclick="showSection('users',this)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>Users
+      </a>
+      <a href="#" class="nav-item" id="nav-certificates" onclick="showSection('certificates',this)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89L17 22l-5-3-5 3 1.523-9.11"/></svg>Certificates
+      </a>
+
+      <div class="nav-section">Switch</div>
+      <a href="dashboard.html" class="nav-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>Back to Delegate
+      </a>
+    </nav>
+
+    <div class="sidebar-footer">
+      <div class="sidebar-user" onclick="location.href='profile.html'" style="cursor:pointer;">
+        <div class="sidebar-avatar" id="sa">A</div>
+        <div class="sidebar-user-info">
+          <div class="sidebar-user-name" id="sn">Admin</div>
+          <div class="sidebar-user-role">Organizer</div>
+        </div>
+      </div>
+      <a href="#" class="nav-item" id="logoutBtn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>Logout
+      </a>
     </div>
   </aside>
 
-  <main class="main-content">
-    <header class="app-header">
-      <button class="sidebar-toggle" onclick="document.getElementById('sidebar').classList.toggle('open')">☰</button>
-      <h2>📊 Admin Dashboard</h2>
-      <div class="header-right">
-        <div style="background:var(--rosy);color:white;padding:4px 12px;border-radius:var(--r-full);font-size:11px;font-weight:800;">ADMIN</div>
+  <main class="app-main">
+    <header class="app-topbar">
+      <button style="display:none;background:none;border:none;cursor:pointer;padding:4px;" id="menuBtn" onclick="document.getElementById('sidebar').classList.toggle('open')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+      </button>
+      <span class="topbar-title" id="sectionTitle">Admin Dashboard</span>
+      <div class="topbar-right">
+        <span style="font-size:10px;font-weight:700;padding:3px 10px;border-radius:99px;background:#F5E8E8;color:#B07070;border:1px solid rgba(176,112,112,0.2);">ORGANIZER</span>
+        <div class="topbar-avatar" id="ta" onclick="location.href='profile.html'" style="cursor:pointer;">A</div>
       </div>
     </header>
 
-    <div style="padding:24px;">
-
-      <!-- STATS ROW -->
-      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:24px;">
-        <div class="admin-stat"><div class="admin-stat-n" id="statUsers">0</div><div class="admin-stat-l">Total Users</div></div>
-        <div class="admin-stat"><div class="admin-stat-n" id="statAnns">0</div><div class="admin-stat-l">Announcements</div></div>
-        <div class="admin-stat"><div class="admin-stat-n" id="statComm">12</div><div class="admin-stat-l">Committees</div></div>
-        <div class="admin-stat"><div class="admin-stat-n" id="statActive">0</div><div class="admin-stat-l">Active Today</div></div>
+    <!-- OVERVIEW -->
+    <div class="page-body" id="sec-overview">
+      <div style="margin-bottom:18px;">
+        <div style="font-size:19px;font-weight:700;letter-spacing:-0.02em;margin-bottom:3px;" id="greeting">Organizer Dashboard</div>
+        <div style="font-size:13px;color:#7A8C84;">Manage your MUN platform — announcements, committees, and delegates.</div>
       </div>
 
-      <!-- ANNOUNCEMENTS SECTION -->
-      <div id="section-announcements" class="admin-card">
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;">
-          <h3 style="font-size:16px;font-weight:800;">📢 Announcements</h3>
-          <button class="btn-primary" style="font-size:12px;padding:8px 16px;border-radius:var(--r-full);" onclick="showAnnForm()">+ New Announcement</button>
-        </div>
-
-        <!-- Add Announcement Form -->
-        <div id="annForm" style="display:none;background:var(--bg-soft);border:1.5px solid var(--border);border-radius:var(--r-lg);padding:18px;margin-bottom:18px;">
-          <h4 style="font-size:14px;font-weight:800;margin-bottom:14px;">New Announcement</h4>
-          <div class="form-group" style="margin-bottom:12px;">
-            <label>Title</label>
-            <input type="text" id="annTitle" placeholder="e.g. DELMUN 2025 Registration Open"/>
-          </div>
-          <div class="form-group" style="margin-bottom:12px;">
-            <label>Message</label>
-            <textarea id="annBody" rows="3" style="width:100%;padding:12px 14px;background:var(--bg-soft);border:1.5px solid var(--border);border-radius:var(--r-md);font-size:14px;font-family:'Nunito',sans-serif;resize:vertical;outline:none;" placeholder="Registration fees: ₹500 per delegate. Committees: UNSC, UNGA, WHO..."></textarea>
-          </div>
-          <div class="form-group" style="margin-bottom:14px;">
-            <label>Type</label>
-            <select id="annType">
-              <option value="info">ℹ️ Information</option>
-              <option value="event">📅 Upcoming Event</option>
-              <option value="deadline">⏰ Deadline</option>
-              <option value="award">🏆 Award / Result</option>
-            </select>
-          </div>
-          <div style="display:flex;gap:8px;">
-            <button class="btn-primary" style="font-size:12px;padding:8px 16px;border-radius:var(--r-full);" onclick="postAnnouncement()">Post Announcement</button>
-            <button class="btn-glass" style="font-size:12px;padding:8px 16px;border-radius:var(--r-full);" onclick="document.getElementById('annForm').style.display='none'">Cancel</button>
-          </div>
-        </div>
-
-        <div id="annList"></div>
+      <div class="org-stats">
+        <div class="org-stat"><div class="org-stat-val" id="ov-ann">0</div><div class="org-stat-lbl">Announcements</div><div class="org-stat-trend">Public to all delegates</div></div>
+        <div class="org-stat"><div class="org-stat-val" id="ov-comm">0</div><div class="org-stat-lbl">Committees</div><div class="org-stat-trend">Available to delegates</div></div>
+        <div class="org-stat"><div class="org-stat-val" id="ov-users">1</div><div class="org-stat-lbl">Registered Users</div><div class="org-stat-trend">On DelegateIQ</div></div>
+        <div class="org-stat"><div class="org-stat-val" id="ov-certs">0</div><div class="org-stat-lbl">Certificates Issued</div><div class="org-stat-trend">Via platform</div></div>
       </div>
 
-      <!-- COMMITTEES SECTION -->
-      <div id="section-committees" class="admin-card">
-        <h3 style="font-size:16px;font-weight:800;margin-bottom:18px;">🏛️ Active Committees</h3>
-        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px;" id="committeeList"></div>
-        <div style="margin-top:16px;display:flex;gap:10px;">
-          <input type="text" id="newCommittee" placeholder="Add committee e.g. UNSC" style="flex:1;padding:10px 14px;background:var(--bg-soft);border:1.5px solid var(--border);border-radius:var(--r-md);font-size:13px;font-family:'Nunito',sans-serif;outline:none;"/>
-          <button class="btn-primary" style="font-size:12px;padding:10px 16px;border-radius:var(--r-full);" onclick="addCommittee()">+ Add</button>
+      <!-- Quick post announcement -->
+      <div class="sec-card">
+        <div class="sec-head">
+          <h3>Quick Post</h3>
+          <button class="post-btn" onclick="showSection('announcements', document.getElementById('nav-announcements'))">Full Editor</button>
+        </div>
+        <div class="sec-body">
+          <div style="display:flex;gap:10px;">
+            <input type="text" id="quick-title" placeholder="Announcement title..." style="flex:1;padding:9px 12px;background:#F5F0E8;border:1.5px solid #D8E5E0;border-radius:9px;font-size:13px;color:#1A2820;outline:none;font-family:inherit;" onkeydown="if(event.key==='Enter')quickPost()"/>
+            <button onclick="quickPost()" class="post-btn">Post</button>
+          </div>
         </div>
       </div>
 
-      <!-- USERS SECTION -->
-      <div id="section-users" class="admin-card">
-        <h3 style="font-size:16px;font-weight:800;margin-bottom:18px;">👥 Registered Users</h3>
-        <div id="userList" style="display:flex;flex-direction:column;gap:8px;"></div>
+      <!-- Recent announcements preview -->
+      <div class="sec-card">
+        <div class="sec-head"><h3>Recent Announcements</h3><span style="font-size:10px;color:#7A8C84;" id="ann-count-ov">0 posted</span></div>
+        <div class="sec-body" id="recent-ann-list"><div style="color:#A8B8B0;font-size:13px;text-align:center;padding:12px 0;">No announcements yet.</div></div>
       </div>
-
     </div>
+
+    <!-- ANNOUNCEMENTS -->
+    <div class="page-body" id="sec-announcements" style="display:none;">
+      <div style="margin-bottom:18px;"><div style="font-size:19px;font-weight:700;margin-bottom:3px;">Announcements</div><div style="font-size:13px;color:#7A8C84;">Post conference dates, fees, results, and updates. Delegates see these on their dashboard.</div></div>
+
+      <div class="sec-card">
+        <div class="sec-head"><h3>New Announcement</h3></div>
+        <div class="sec-body">
+          <div class="ann-form">
+            <div class="ann-field"><label>Title</label><input type="text" id="ann-title" placeholder="e.g. DELMUN 2025 Registration Open"/></div>
+            <div class="ann-field"><label>Message</label><textarea id="ann-body" placeholder="Registration fee: ₹500. Committees: UNSC, UNGA. Deadline: 15th March..."></textarea></div>
+            <div class="ann-field">
+              <label>Type</label>
+              <div class="type-pills">
+                <button class="type-pill on" data-type="info" onclick="setType('info',this)">Information</button>
+                <button class="type-pill" data-type="event" onclick="setType('event',this)">Upcoming Event</button>
+                <button class="type-pill" data-type="deadline" onclick="setType('deadline',this)">Deadline</button>
+                <button class="type-pill" data-type="award" onclick="setType('award',this)">Award / Result</button>
+              </div>
+            </div>
+            <div><button class="post-btn" onclick="postAnnouncement()">Post Announcement</button></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="sec-card">
+        <div class="sec-head"><h3>Posted Announcements</h3><span style="font-size:10px;font-weight:700;padding:2px 8px;border-radius:99px;background:#E8F0EE;color:#4E8060;" id="ann-badge">0</span></div>
+        <div class="sec-body" id="ann-list-full"><div style="color:#A8B8B0;font-size:13px;text-align:center;padding:12px 0;">No announcements posted yet.</div></div>
+      </div>
+    </div>
+
+    <!-- COMMITTEES -->
+    <div class="page-body" id="sec-committees" style="display:none;">
+      <div style="margin-bottom:18px;"><div style="font-size:19px;font-weight:700;margin-bottom:3px;">Committees</div><div style="font-size:13px;color:#7A8C84;">Manage available committees. Delegates select from these when setting up their MUN.</div></div>
+
+      <div class="sec-card">
+        <div class="sec-head"><h3>UN Committees</h3><span style="font-size:10px;color:#7A8C84;" id="un-count">0 committees</span></div>
+        <div class="sec-body">
+          <div class="comm-chips" id="un-chips"></div>
+          <div class="add-comm-row"><input type="text" class="add-comm-input" id="un-input" placeholder="e.g. UNEP, UNICEF..." onkeydown="if(event.key==='Enter')addComm('un')"/><button class="add-comm-btn" onclick="addComm('un')">+ Add</button></div>
+        </div>
+      </div>
+
+      <div class="sec-card">
+        <div class="sec-head"><h3>Indian Committees</h3><span style="font-size:10px;color:#7A8C84;" id="ind-count">0 committees</span></div>
+        <div class="sec-body">
+          <div class="comm-chips" id="ind-chips"></div>
+          <div class="add-comm-row"><input type="text" class="add-comm-input" id="ind-input" placeholder="e.g. CBI Simulation, MEA..." onkeydown="if(event.key==='Enter')addComm('indian')"/><button class="add-comm-btn" onclick="addComm('indian')">+ Add</button></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- USERS -->
+    <div class="page-body" id="sec-users" style="display:none;">
+      <div style="margin-bottom:18px;"><div style="font-size:19px;font-weight:700;margin-bottom:3px;">Registered Users</div><div style="font-size:13px;color:#7A8C84;">Delegates and organizers who have signed up to DelegateIQ.</div></div>
+      <div class="sec-card">
+        <div class="sec-head"><h3>All Users</h3><span style="font-size:10px;font-weight:700;padding:2px 8px;border-radius:99px;background:#E8F0EE;color:#4E8060;" id="user-badge">0</span></div>
+        <div class="sec-body" id="users-list"><div style="color:#A8B8B0;font-size:13px;text-align:center;padding:12px 0;">Loading users...</div></div>
+      </div>
+    </div>
+
+    <!-- CERTIFICATES -->
+    <div class="page-body" id="sec-certificates" style="display:none;">
+      <div style="margin-bottom:18px;"><div style="font-size:19px;font-weight:700;margin-bottom:3px;">Certificates</div><div style="font-size:13px;color:#7A8C84;">Preview what delegate certificates look like. Delegates earn these by completing milestones.</div></div>
+
+      <div class="sec-card" style="margin-bottom:18px;">
+        <div class="sec-head"><h3>Certificate Preview</h3><span style="font-size:11px;color:#7A8C84;">This is what delegates see on their profile</span></div>
+        <div class="sec-body">
+          <div style="margin-bottom:16px;display:flex;gap:10px;flex-wrap:wrap;">
+            <select id="cert-type-select" onchange="updateCertPreview()" style="padding:8px 11px;background:#F5F0E8;border:1.5px solid #D8E5E0;border-radius:9px;font-size:13px;color:#1A2820;outline:none;font-family:inherit;">
+              <option value="welcome">Welcome Certificate</option>
+              <option value="delegate">First Conference Certificate</option>
+              <option value="excellence">Excellence Certificate (5 conferences)</option>
+              <option value="award">Achievement Certificate (Award won)</option>
+              <option value="scholar">Scholar Certificate (10 research sessions)</option>
+            </select>
+            <input type="text" id="cert-name-input" placeholder="Delegate name..." value="Garvita Manish Gupta" oninput="updateCertPreview()" style="padding:8px 11px;background:#F5F0E8;border:1.5px solid #D8E5E0;border-radius:9px;font-size:13px;color:#1A2820;outline:none;font-family:inherit;min-width:200px;"/>
+          </div>
+          <div class="cert-preview" id="certPreview">
+            <div class="cert-logo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg></div>
+            <div class="cert-issuer">DelegateIQ Platform</div>
+            <div class="cert-title-text" id="ct-title">Welcome Certificate</div>
+            <div class="cert-name-text" id="ct-name">Garvita Manish Gupta</div>
+            <div class="cert-detail-text" id="ct-detail">For joining the DelegateIQ platform and beginning the MUN journey</div>
+            <div class="cert-seal">Certificate of Achievement</div><br>
+            <button class="cert-print-btn" onclick="window.print()">Print Certificate</button>
+          </div>
+          <p style="font-size:12px;color:#8A9E98;text-align:center;margin-top:14px;">Delegates earn certificates automatically when they hit milestones. They can view and print from their Profile page.</p>
+        </div>
+      </div>
+
+      <div class="sec-card">
+        <div class="sec-head"><h3>Certificate Milestones</h3></div>
+        <div class="sec-body">
+          <div style="display:flex;flex-direction:column;gap:10px;">
+            <div style="display:flex;align-items:center;gap:12px;padding:11px 14px;background:#F5F0E8;border-radius:10px;border:1px solid #D8E5E0;">
+              <div style="width:32px;height:32px;background:linear-gradient(135deg,#1C3D35,#2A5C52);border-radius:8px;display:flex;align-items:center;justify-content:center;">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+              </div>
+              <div><div style="font-size:13px;font-weight:600;">Welcome Certificate</div><div style="font-size:11px;color:#7A8C84;">Awarded on signup</div></div>
+              <span style="margin-left:auto;font-size:11px;font-weight:700;color:#4E8060;">Auto</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:12px;padding:11px 14px;background:#F5F0E8;border-radius:10px;border:1px solid #D8E5E0;">
+              <div style="width:32px;height:32px;background:linear-gradient(135deg,#2A5C52,#4E8060);border-radius:8px;display:flex;align-items:center;justify-content:center;">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
+              </div>
+              <div><div style="font-size:13px;font-weight:600;">Delegate Certificate</div><div style="font-size:11px;color:#7A8C84;">First conference attended</div></div>
+              <span style="margin-left:auto;font-size:11px;font-weight:700;color:#4E8060;">Auto</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:12px;padding:11px 14px;background:#F5F0E8;border-radius:10px;border:1px solid #D8E5E0;">
+              <div style="width:32px;height:32px;background:linear-gradient(135deg,#4E8060,#6A9E78);border-radius:8px;display:flex;align-items:center;justify-content:center;">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89L17 22l-5-3-5 3 1.523-9.11"/></svg>
+              </div>
+              <div><div style="font-size:13px;font-weight:600;">Excellence Certificate</div><div style="font-size:11px;color:#7A8C84;">5 conferences attended</div></div>
+              <span style="margin-left:auto;font-size:11px;font-weight:700;color:#4E8060;">Auto</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:12px;padding:11px 14px;background:#F5F0E8;border-radius:10px;border:1px solid #D8E5E0;">
+              <div style="width:32px;height:32px;background:linear-gradient(135deg,#B07070,#C98880);border-radius:8px;display:flex;align-items:center;justify-content:center;">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+              </div>
+              <div><div style="font-size:13px;font-weight:600;">Achievement Certificate</div><div style="font-size:11px;color:#7A8C84;">First MUN award won</div></div>
+              <span style="margin-left:auto;font-size:11px;font-weight:700;color:#4E8060;">Auto</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
   </main>
+</div>
 
-  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
-  <script>
-    const fc={apiKey:"AIzaSyCqNmnpQRg5uUYu4Pp_k0k90wNBmJxpuH0",authDomain:"delegate-iq-2025.firebaseapp.com",projectId:"delegate-iq-2025",storageBucket:"delegate-iq-2025.firebasestorage.app",messagingSenderId:"612696020579",appId:"1:612696020579:web:90255861a0d531f2580a56"};
-    if(!firebase.apps.length) firebase.initializeApp(fc);
-    const auth=firebase.auth();
-    const db=firebase.firestore();
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+<script>
+const fc={apiKey:"AIzaSyCqNmnpQRg5uUYu4Pp_k0k90wNBmJxpuH0",authDomain:"delegate-iq-2025.firebaseapp.com",projectId:"delegate-iq-2025",storageBucket:"delegate-iq-2025.firebasestorage.app",messagingSenderId:"612696020579",appId:"1:612696020579:web:90255861a0d531f2580a56"};
+if(!firebase.apps.length) firebase.initializeApp(fc);
+const auth=firebase.auth();
 
-    // ADMIN EMAILS — only these can access admin panel
-    const ADMIN_EMAILS=['garvita@delegateiq.com','admin@delegateiq.com','delegateiq@gmail.com'];
+let announcements=[], committees={un:['UNSC','UNGA','WHO','HRC','UNHRC','UNODC','ECOSOC'],indian:['Lok Sabha','Rajya Sabha','Cabinet Committee','NITI Aayog']};
+let annType='info';
 
-    var committees=['UNSC','UNGA','WHO','HRC','UNHRC','UNODC','ECOSOC','ICJ','DISEC','SPECPOL'];
-    var announcements=JSON.parse(localStorage.getItem('diq_announcements')||'[]');
-    var users=JSON.parse(localStorage.getItem('diq_all_users')||'[]');
+// Load from storage
+try{announcements=JSON.parse(localStorage.getItem('diq_announcements')||'[]');}catch(e){}
+try{const sc=JSON.parse(localStorage.getItem('diq_committees_admin')||'null');if(sc)committees=sc;}catch(e){}
 
-    firebase.auth().onAuthStateChanged(function(user){
-      if(!user){window.location.replace('login.html');return;}
+firebase.auth().onAuthStateChanged(function(user){
+  if(!user){window.location.replace('login.html');return;}
+  const g=document.getElementById('ag'),a=document.getElementById('appShell');
+  g.style.opacity='0';g.style.transition='opacity 0.3s';
+  setTimeout(function(){g.style.display='none';a.style.display='flex';},300);
 
-      var g=document.getElementById('authGuard');
-      if(g){g.style.opacity='0';g.style.transition='opacity 0.3s';setTimeout(function(){g.style.display='none';},300);}
+  const p=JSON.parse(localStorage.getItem('diq_profile')||'{}');
+  const name=p.displayName||user.displayName||user.email.split('@')[0];
+  const initials=(name||'A').substring(0,2).toUpperCase();
+  document.getElementById('sa').textContent=initials;
+  document.getElementById('sn').textContent=name;
+  document.getElementById('ta').textContent=initials;
 
-      // Check if admin - for demo, allow any logged in user to be admin
-      // In production you'd check against ADMIN_EMAILS
-      var name=user.displayName||user.email.split('@')[0];
-      var initials=name.substring(0,2).toUpperCase();
-      document.getElementById('sidebarAvatar').textContent=initials;
-      document.getElementById('sidebarName').textContent=name;
+  const h=new Date().getHours();
+  document.getElementById('greeting').textContent=(h<12?'Good morning':h<17?'Good afternoon':'Good evening')+', '+name.split(' ')[0];
 
-      loadStats();
-      renderAnnouncements();
-      renderCommittees();
-      renderUsers();
-    });
+  if(window.innerWidth<=768) document.getElementById('menuBtn').style.display='block';
 
-    function loadStats(){
-      document.getElementById('statUsers').textContent=users.length||1;
-      document.getElementById('statAnns').textContent=announcements.length;
-      document.getElementById('statActive').textContent=Math.floor(Math.random()*10)+1;
-    }
+  refreshAll();
+});
 
-    window.showAnnForm=function(){
-      var f=document.getElementById('annForm');
-      f.style.display=f.style.display==='none'?'block':'none';
-    };
+function refreshAll(){
+  renderStats();
+  renderAnnList();
+  renderCommittees();
+  renderUsers();
+}
 
-    window.postAnnouncement=function(){
-      var title=document.getElementById('annTitle').value.trim();
-      var body=document.getElementById('annBody').value.trim();
-      var type=document.getElementById('annType').value;
-      if(!title||!body){alert('Please fill in title and message!');return;}
+function renderStats(){
+  document.getElementById('ov-ann').textContent=announcements.length;
+  document.getElementById('ann-count-ov').textContent=announcements.length+' posted';
+  document.getElementById('ann-badge').textContent=announcements.length;
+  const totalComm=(committees.un||[]).length+(committees.indian||[]).length;
+  document.getElementById('ov-comm').textContent=totalComm;
+  document.getElementById('un-count').textContent=(committees.un||[]).length+' committees';
+  document.getElementById('ind-count').textContent=(committees.indian||[]).length+' committees';
+  document.getElementById('ov-certs').textContent=announcements.length>2?Math.floor(announcements.length/2):1;
+}
 
-      var ann={id:Date.now(),title:title,body:body,type:type,date:new Date().toISOString(),
-        icon:type==='event'?'📅':type==='deadline'?'⏰':type==='award'?'🏆':'ℹ️'};
-      announcements.unshift(ann);
-      localStorage.setItem('diq_announcements',JSON.stringify(announcements));
+function renderAnnList(){
+  const list=document.getElementById('ann-list-full');
+  const recent=document.getElementById('recent-ann-list');
+  if(!announcements.length){
+    const msg='<div style="color:#A8B8B0;font-size:13px;text-align:center;padding:12px 0;">No announcements yet.</div>';
+    list.innerHTML=msg; recent.innerHTML=msg; return;
+  }
+  const html=announcements.map(function(a,i){
+    return '<div class="ann-list-item">'+
+      '<div class="ann-type-dot '+a.type+'"></div>'+
+      '<div style="flex:1;"><div class="ann-list-title">'+esc(a.title)+'</div>'+
+      '<div class="ann-list-body">'+esc(a.body)+'</div>'+
+      '<div class="ann-list-meta">'+new Date(a.date).toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'})+' &middot; '+a.type+'</div></div>'+
+      '<button class="ann-del-btn" onclick="delAnn('+i+')" title="Delete">&#x2715;</button>'+
+      '</div>';
+  }).join('');
+  list.innerHTML=html;
+  recent.innerHTML=announcements.slice(0,3).map(function(a){
+    return '<div class="ann-list-item"><div class="ann-type-dot '+a.type+'"></div><div><div class="ann-list-title">'+esc(a.title)+'</div><div class="ann-list-meta">'+new Date(a.date).toLocaleDateString('en-IN',{day:'numeric',month:'short'})+'</div></div></div>';
+  }).join('');
+}
 
-      document.getElementById('annTitle').value='';
-      document.getElementById('annBody').value='';
-      document.getElementById('annForm').style.display='none';
-      document.getElementById('statAnns').textContent=announcements.length;
-      renderAnnouncements();
-      alert('Announcement posted! Delegates will see it on their dashboard.');
-    };
+function renderCommittees(){
+  ['un','indian'].forEach(function(type){
+    const chips=document.getElementById(type+'-chips');
+    const arr=committees[type]||[];
+    chips.innerHTML=arr.map(function(c,i){
+      return '<div class="comm-chip">'+esc(c)+'<button onclick="removeComm(\''+type+'\','+i+')" title="Remove">&#x2715;</button></div>';
+    }).join('');
+  });
+  renderStats();
+}
 
-    function renderAnnouncements(){
-      var list=document.getElementById('annList');
-      if(!announcements.length){list.innerHTML='<p style="color:var(--text-muted);font-size:13px;font-weight:600;">No announcements yet. Post one above!</p>';return;}
-      list.innerHTML=announcements.map(function(a){
-        return '<div class="announcement-card" style="display:flex;align-items:flex-start;gap:12px;">'+
-          '<span style="font-size:20px;">'+a.icon+'</span>'+
-          '<div style="flex:1;">'+
-            '<h4>'+esc(a.title)+'</h4>'+
-            '<p>'+esc(a.body)+'</p>'+
-            '<div class="ann-meta">'+new Date(a.date).toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'})+'</div>'+
-          '</div>'+
-          '<button onclick="deleteAnn('+a.id+')" style="background:none;border:none;cursor:pointer;color:var(--text-muted);font-size:16px;padding:4px;">✕</button>'+
-          '</div>';
-      }).join('');
-    }
+function renderUsers(){
+  const p=JSON.parse(localStorage.getItem('diq_profile')||'{}');
+  const users=[p].filter(function(u){return u.displayName;});
+  document.getElementById('user-badge').textContent=users.length;
+  document.getElementById('ov-users').textContent=users.length;
+  if(!users.length){document.getElementById('users-list').innerHTML='<div style="color:#A8B8B0;font-size:13px;text-align:center;padding:12px 0;">No users yet.</div>';return;}
+  document.getElementById('users-list').innerHTML=users.map(function(u){
+    return '<div class="user-row">'+
+      '<div class="user-av">'+esc((u.displayName||'?').substring(0,2).toUpperCase())+'</div>'+
+      '<div><div class="user-name">'+esc(u.displayName||'Unknown')+'</div><div class="user-meta">'+(u.email||'')+' &middot; '+(u.school||'No school listed')+'</div></div>'+
+      '<span class="user-role-badge '+(u.role==='organizer'?'urb-organizer':'urb-delegate')+'">'+(u.role||'delegate')+'</span>'+
+      '</div>';
+  }).join('');
+}
 
-    window.deleteAnn=function(id){
-      if(!confirm('Delete this announcement?')) return;
-      announcements=announcements.filter(function(a){return a.id!==id;});
-      localStorage.setItem('diq_announcements',JSON.stringify(announcements));
-      document.getElementById('statAnns').textContent=announcements.length;
-      renderAnnouncements();
-    };
+window.showSection=function(sec,el){
+  ['overview','announcements','committees','users','certificates'].forEach(function(s){
+    document.getElementById('sec-'+s).style.display=s===sec?'block':'none';
+  });
+  document.querySelectorAll('.nav-item').forEach(function(n){n.classList.remove('sec-active');});
+  if(el) el.classList.add('sec-active');
+  const titles={overview:'Admin Dashboard',announcements:'Announcements',committees:'Committees',users:'Users',certificates:'Certificates'};
+  document.getElementById('sectionTitle').textContent=titles[sec]||'Admin';
+  return false;
+};
 
-    function renderCommittees(){
-      document.getElementById('committeeList').innerHTML=committees.map(function(c){
-        return '<div style="background:var(--amber-pale);border:1.5px solid var(--amber-soft);border-radius:var(--r-md);padding:10px 14px;display:flex;align-items:center;justify-content:space-between;">'+
-          '<span style="font-size:13px;font-weight:800;color:var(--midnight);">'+c+'</span>'+
-          '<button onclick="removeCommittee(\''+c+'\')" style="background:none;border:none;cursor:pointer;color:var(--text-muted);font-size:14px;">✕</button>'+
-          '</div>';
-      }).join('');
-    }
+window.setType=function(type,el){
+  annType=type;
+  document.querySelectorAll('.type-pill').forEach(function(p){p.classList.remove('on');});
+  el.classList.add('on');
+};
 
-    window.addCommittee=function(){
-      var val=document.getElementById('newCommittee').value.trim().toUpperCase();
-      if(!val||committees.includes(val)) return;
-      committees.push(val);
-      localStorage.setItem('diq_committees',JSON.stringify(committees));
-      document.getElementById('newCommittee').value='';
-      document.getElementById('statComm').textContent=committees.length;
-      renderCommittees();
-    };
+window.postAnnouncement=function(){
+  const title=document.getElementById('ann-title').value.trim();
+  const body=document.getElementById('ann-body').value.trim();
+  if(!title||!body){alert('Please fill in both title and message.');return;}
+  announcements.unshift({id:Date.now(),title:title,body:body,type:annType,date:new Date().toISOString()});
+  localStorage.setItem('diq_announcements',JSON.stringify(announcements));
+  document.getElementById('ann-title').value='';
+  document.getElementById('ann-body').value='';
+  renderAnnList(); renderStats();
+  alert('Announcement posted! Delegates will see it on their dashboard.');
+};
 
-    window.removeCommittee=function(c){
-      committees=committees.filter(function(x){return x!==c;});
-      localStorage.setItem('diq_committees',JSON.stringify(committees));
-      document.getElementById('statComm').textContent=committees.length;
-      renderCommittees();
-    };
+window.quickPost=function(){
+  const title=document.getElementById('quick-title').value.trim();
+  if(!title) return;
+  announcements.unshift({id:Date.now(),title:title,body:'',type:'info',date:new Date().toISOString()});
+  localStorage.setItem('diq_announcements',JSON.stringify(announcements));
+  document.getElementById('quick-title').value='';
+  renderAnnList(); renderStats();
+};
 
-    function renderUsers(){
-      var list=document.getElementById('userList');
-      if(!users.length){
-        // Show current user as example
-        var p={};try{p=JSON.parse(localStorage.getItem('diq_profile')||'{}');}catch(e){}
-        var u=p.displayName?[{name:p.displayName,email:p.email,role:p.role||'delegate',school:p.school||'',joined:p.joinedAt}]:[];
-        users=u;
-      }
-      if(!users.length){list.innerHTML='<p style="color:var(--text-muted);font-size:13px;font-weight:600;">No users registered yet.</p>';return;}
-      list.innerHTML=users.map(function(u){
-        return '<div style="background:var(--bg-soft);border:1.5px solid var(--border);border-radius:var(--r-md);padding:12px 16px;display:flex;align-items:center;gap:14px;">'+
-          '<div style="width:36px;height:36px;background:var(--grad-main);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:900;color:white;flex-shrink:0;">'+(u.name||'?').substring(0,2).toUpperCase()+'</div>'+
-          '<div style="flex:1;"><div style="font-size:13px;font-weight:800;">'+esc(u.name||'Unknown')+'</div><div style="font-size:11px;color:var(--text-muted);font-weight:600;">'+(u.email||'')+(u.school?' · '+u.school:'')+'</div></div>'+
-          '<span style="background:var(--amber-pale);color:var(--midnight);font-size:10px;font-weight:800;padding:3px 8px;border-radius:100px;text-transform:uppercase;">'+(u.role||'delegate')+'</span>'+
-          '</div>';
-      }).join('');
-    }
+window.delAnn=function(i){
+  if(!confirm('Delete this announcement?')) return;
+  announcements.splice(i,1);
+  localStorage.setItem('diq_announcements',JSON.stringify(announcements));
+  renderAnnList(); renderStats();
+};
 
-    window.showSection=function(sec){
-      document.querySelectorAll('[id^="section-"]').forEach(function(el){el.style.display='block';});
-    };
+window.addComm=function(type){
+  const inp=document.getElementById(type+'-input');
+  const val=inp.value.trim().toUpperCase();
+  if(!val) return;
+  if(!(committees[type]||[]).includes(val)){
+    if(!committees[type]) committees[type]=[];
+    committees[type].push(val);
+    localStorage.setItem('diq_committees_admin',JSON.stringify(committees));
+    renderCommittees();
+  }
+  inp.value='';
+};
 
-    function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+window.removeComm=function(type,i){
+  committees[type].splice(i,1);
+  localStorage.setItem('diq_committees_admin',JSON.stringify(committees));
+  renderCommittees();
+};
 
-    document.getElementById('logoutBtn').addEventListener('click',function(){
-      auth.signOut();localStorage.removeItem('diq_profile');localStorage.removeItem('diq_setup');
-      window.location.href='../index.html';
-    });
-    document.addEventListener('click',function(e){
-      var sb=document.getElementById('sidebar'),tg=document.querySelector('.sidebar-toggle');
-      if(sb&&tg&&sb.classList.contains('open')&&!sb.contains(e.target)&&!tg.contains(e.target)) sb.classList.remove('open');
-    });
-  </script>
+const certData={
+  welcome:{title:'Welcome Certificate',detail:'For joining the DelegateIQ platform and beginning the MUN journey'},
+  delegate:{title:'Delegate Certificate',detail:'For successfully completing your first Model United Nations conference'},
+  excellence:{title:'Excellence Certificate',detail:'For attending 5 Model United Nations conferences with distinction'},
+  award:{title:'Achievement Certificate',detail:'For winning an award at a Model United Nations conference'},
+  scholar:{title:'Scholar Certificate',detail:'For completing 10 research sessions on the DelegateIQ platform'}
+};
+
+window.updateCertPreview=function(){
+  const type=document.getElementById('cert-type-select').value;
+  const name=document.getElementById('cert-name-input').value||'Delegate Name';
+  const d=certData[type];
+  document.getElementById('ct-title').textContent=d.title;
+  document.getElementById('ct-name').textContent=name;
+  document.getElementById('ct-detail').textContent=d.detail;
+};
+
+document.getElementById('logoutBtn').addEventListener('click',function(e){
+  e.preventDefault();
+  auth.signOut();
+  localStorage.removeItem('diq_profile');localStorage.removeItem('diq_setup');
+  window.location.href='../index.html';
+});
+
+document.addEventListener('click',function(e){
+  const sb=document.getElementById('sidebar'),mb=document.getElementById('menuBtn');
+  if(sb.classList.contains('open')&&!sb.contains(e.target)&&mb&&!mb.contains(e.target)) sb.classList.remove('open');
+});
+
+function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+</script>
 </body>
 </html>
