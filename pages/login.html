@@ -4,102 +4,166 @@
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Sign In — DelegateIQ</title>
-  <link rel="stylesheet" href="../css/style.css"/>
   <style>
-    .auth-card{overflow:hidden}
+    @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=DM+Serif+Display:ital@0;1&display=swap');
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+    body{min-height:100vh;display:flex;align-items:center;justify-content:center;background:#FAF8F4;font-family:'DM Sans',system-ui,sans-serif;padding:20px;}
+    .card{width:100%;max-width:420px;background:#fff;border:1.5px solid #D8E5E0;border-radius:22px;padding:36px 32px;box-shadow:0 8px 40px rgba(28,61,53,0.10);}
+    .brand{display:flex;align-items:center;gap:10px;margin-bottom:24px;text-decoration:none;}
+    .brand-mark{width:34px;height:34px;background:linear-gradient(135deg,#1C3D35,#2A5C52);border-radius:9px;display:flex;align-items:center;justify-content:center;}
+    .brand-mark svg{width:17px;height:17px;color:white;}
+    .brand-name{font-size:16px;font-weight:700;color:#1A2820;letter-spacing:-0.02em;}
+    .tabs{display:flex;background:#F5F0E8;border:1px solid #D8E5E0;border-radius:10px;padding:3px;margin-bottom:22px;}
+    .tab{flex:1;text-align:center;padding:7px;border-radius:8px;font-size:13px;font-weight:600;color:#8A9E98;text-decoration:none;transition:all 0.12s;}
+    .tab.active{background:#fff;color:#1A2820;box-shadow:0 1px 4px rgba(0,0,0,0.08);}
+    h2{font-size:20px;font-weight:700;margin-bottom:3px;letter-spacing:-0.02em;color:#1A2820;}
+    p.sub{font-size:13px;color:#7A8C84;margin-bottom:20px;}
+    .err{background:#FEF2F2;border:1px solid #FECACA;color:#DC2626;padding:9px 12px;border-radius:8px;font-size:13px;display:none;margin-bottom:14px;}
+    .err.show{display:block;}
+    .fields{display:flex;flex-direction:column;gap:13px;margin-bottom:14px;}
+    .field{display:flex;flex-direction:column;gap:4px;}
+    .field label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:#7A8C84;}
+    .field input{padding:10px 12px;background:#F5F0E8;border:1.5px solid #D8E5E0;border-radius:10px;font-size:14px;color:#1A2820;outline:none;font-family:inherit;transition:all 0.12s;width:100%;}
+    .field input:focus{border-color:#1C3D35;background:#fff;box-shadow:0 0 0 3px rgba(28,61,53,0.08);}
+    .field input::placeholder{color:#A8B8B0;}
+    .pw-wrap{position:relative;}
+    .pw-wrap input{padding-right:40px;}
+    .pw-eye{position:absolute;right:11px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:#8A9E98;padding:3px;display:flex;align-items:center;}
+    .row{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;}
+    .remember{display:flex;align-items:center;gap:6px;font-size:12px;color:#4A6058;cursor:pointer;}
+    .remember input{accent-color:#1C3D35;}
+    .forgot{font-size:12px;color:#1C3D35;font-weight:600;text-decoration:none;}
+    .forgot:hover{text-decoration:underline;}
+    .btn{width:100%;padding:11px;border-radius:10px;border:none;cursor:pointer;background:linear-gradient(135deg,#1C3D35,#2A5C52);color:white;font-size:14px;font-weight:600;font-family:inherit;box-shadow:0 2px 8px rgba(28,61,53,0.22);transition:all 0.15s;margin-bottom:14px;}
+    .btn:hover{transform:translateY(-1px);box-shadow:0 4px 16px rgba(28,61,53,0.28);}
+    .btn:disabled{opacity:0.6;cursor:not-allowed;transform:none;}
+    .divider{display:flex;align-items:center;gap:9px;color:#A8B8B0;font-size:12px;margin-bottom:14px;}
+    .divider::before,.divider::after{content:'';flex:1;height:1px;background:#D8E5E0;}
+    .google-btn{width:100%;padding:10px;border-radius:10px;border:1.5px solid #D8E5E0;background:#fff;font-size:13px;font-weight:600;color:#1A2820;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:8px;transition:all 0.12s;margin-bottom:16px;}
+    .google-btn:hover{border-color:#C5D8D4;background:#F5F0E8;}
+    .switch{text-align:center;font-size:13px;color:#8A9E98;}
+    .switch a{color:#1C3D35;font-weight:600;text-decoration:none;}
+    .switch a:hover{text-decoration:underline;}
   </style>
 </head>
-<body class="auth-page">
-  <div class="auth-container">
-    <a href="../index.html" class="auth-logo-centered">
-      <div class="logo-mark">D</div>
-      <span class="logo-text">DelegateIQ</span>
-    </a>
-    <div class="auth-card">
-      <div class="auth-toggle-row">
-        <a href="login.html" class="auth-toggle active">Sign In</a>
-        <a href="signup.html" class="auth-toggle">Sign Up</a>
+<body>
+  <div class="card">
+    <a href="../index.html" class="brand">
+      <div class="brand-mark">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
       </div>
-      <h2 class="auth-title">Welcome back 👋</h2>
-      <p class="auth-sub">Sign in to continue your delegate journey</p>
-      <div class="auth-error" id="authError"></div>
-      <form class="auth-form" id="loginForm">
-        <div class="form-group">
-          <label>Email</label>
-          <input type="email" id="email" placeholder="you@school.edu" required/>
-        </div>
-        <div class="form-group">
-          <label>Password</label>
-          <div class="input-pw-wrap">
-            <input type="password" id="password" placeholder="••••••••" required/>
-            <button type="button" class="toggle-pw" onclick="togglePw()">👁</button>
-          </div>
-        </div>
-        <div class="form-row-space">
-          <label class="checkbox-label"><input type="checkbox"/> Remember me</label>
-          <a href="#" class="forgot-link">Forgot password?</a>
-        </div>
-        <button type="submit" class="btn-primary btn-full" id="loginBtn">Sign In →</button>
-      </form>
-      <div class="auth-divider"><span>or</span></div>
-      <button class="google-btn" id="googleBtn">
-        <svg width="18" height="18" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
-        Continue with Google
-      </button>
-      <p class="auth-switch">Don't have an account? <a href="signup.html">Sign up free</a></p>
+      <span class="brand-name">DelegateIQ</span>
+    </a>
+
+    <div class="tabs">
+      <a href="login.html" class="tab active">Sign In</a>
+      <a href="signup.html" class="tab">Sign Up</a>
     </div>
+
+    <h2>Welcome back</h2>
+    <p class="sub">Sign in to continue your delegate journey</p>
+
+    <div class="err" id="authError"></div>
+
+    <div class="fields">
+      <div class="field">
+        <label>Email</label>
+        <input type="email" id="email" placeholder="you@college.edu" autocomplete="email"/>
+      </div>
+      <div class="field">
+        <label>Password</label>
+        <div class="pw-wrap">
+          <input type="password" id="password" placeholder="••••••••" autocomplete="current-password" onkeydown="if(event.key==='Enter')doLogin()"/>
+          <button class="pw-eye" type="button" onclick="togglePw()">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="row">
+      <label class="remember"><input type="checkbox"/> Remember me</label>
+      <a href="#" class="forgot" onclick="doForgot()">Forgot password?</a>
+    </div>
+
+    <button class="btn" id="loginBtn" onclick="doLogin()">Sign In</button>
+    <div class="divider">or</div>
+    <button class="google-btn" onclick="doGoogle()">
+      <svg width="17" height="17" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+      Continue with Google
+    </button>
+    <p class="switch">Don't have an account? <a href="signup.html">Sign up free</a></p>
   </div>
 
-  <script type="module">
-    import { auth, googleProvider } from '../js/firebase.js';
-    import { signInWithEmailAndPassword, signInWithPopup, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+  <script>
+    const fc={apiKey:"AIzaSyCqNmnpQRg5uUYu4Pp_k0k90wNBmJxpuH0",authDomain:"delegate-iq-2025.firebaseapp.com",projectId:"delegate-iq-2025",storageBucket:"delegate-iq-2025.firebasestorage.app",messagingSenderId:"612696020579",appId:"1:612696020579:web:90255861a0d531f2580a56"};
+    if(!firebase.apps.length) firebase.initializeApp(fc);
+    const auth=firebase.auth();
 
-    onAuthStateChanged(auth, user => {
-      if (user) window.location.href = 'dashboard.html';
+    // If already logged in, redirect
+    auth.onAuthStateChanged(function(user){
+      if(user) window.location.href='dashboard.html';
     });
 
-    function showError(msg) {
-      const el = document.getElementById('authError');
-      el.textContent = msg;
-      el.classList.add('show');
-    }
+    function showErr(msg){const e=document.getElementById('authError');e.textContent=msg;e.classList.add('show');}
+    function clearErr(){document.getElementById('authError').classList.remove('show');}
 
-    document.getElementById('loginForm').addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const btn = document.getElementById('loginBtn');
-      btn.textContent = 'Signing in...';
-      btn.disabled = true;
-      try {
-        await signInWithEmailAndPassword(auth, document.getElementById('email').value.trim(), document.getElementById('password').value);
-        window.location.href = 'dashboard.html';
-      } catch (err) {
-        btn.textContent = 'Sign In →';
-        btn.disabled = false;
-        const msgs = {
-          'auth/user-not-found': 'No account found with this email. Sign up first!',
-          'auth/wrong-password': 'Wrong password. Try again.',
-          'auth/invalid-credential': 'Wrong email or password. Try again.',
-          'auth/invalid-email': 'Please enter a valid email.',
-          'auth/too-many-requests': 'Too many attempts. Please wait a moment.',
-          'auth/network-request-failed': 'No internet. Check your connection.',
-        };
-        showError(msgs[err.code] || err.message);
+    window.togglePw=function(){const i=document.getElementById('password');i.type=i.type==='password'?'text':'password';};
+
+    window.doLogin=async function(){
+      clearErr();
+      const email=document.getElementById('email').value.trim();
+      const pw=document.getElementById('password').value;
+      if(!email||!pw){showErr('Please enter your email and password.');return;}
+      const btn=document.getElementById('loginBtn');
+      btn.textContent='Signing in...';btn.disabled=true;
+      try{
+        const c=await auth.signInWithEmailAndPassword(email,pw);
+        const name=c.user.displayName||email.split('@')[0];
+        // Update localStorage profile name from Firebase
+        let p={};try{p=JSON.parse(localStorage.getItem('diq_profile')||'{}');}catch(e){}
+        if(!p.displayName||p.email!==email){
+          p.displayName=name;p.email=email;
+          p.initials=(name.substring(0,2)).toUpperCase();
+          if(!p.badges) p.badges=['first_login'];
+          if(!p.role) p.role='delegate';
+          localStorage.setItem('diq_profile',JSON.stringify(p));
+        }
+        window.location.href='dashboard.html';
+      }catch(e){
+        btn.textContent='Sign In';btn.disabled=false;
+        const msgs={'auth/user-not-found':'No account found with this email.','auth/wrong-password':'Incorrect password.','auth/invalid-email':'Please enter a valid email.','auth/too-many-requests':'Too many attempts. Please try again later.'};
+        showErr(msgs[e.code]||e.message);
       }
-    });
+    };
 
-    document.getElementById('googleBtn').addEventListener('click', async () => {
-      try {
-        await signInWithPopup(auth, googleProvider);
-        window.location.href = 'dashboard.html';
-      } catch (err) {
-        showError('Google sign-in failed. Try again.');
-      }
-    });
+    window.doGoogle=async function(){
+      try{
+        const p=new firebase.auth.GoogleAuthProvider();
+        const c=await auth.signInWithPopup(p);
+        const name=c.user.displayName||c.user.email.split('@')[0];
+        const pts=name.split(' ');
+        let existing={};try{existing=JSON.parse(localStorage.getItem('diq_profile')||'{}');}catch(e){}
+        if(!existing.displayName){
+          localStorage.setItem('diq_profile',JSON.stringify({
+            displayName:name,firstName:pts[0],lastName:pts.slice(1).join(' '),
+            email:c.user.email,school:'',
+            initials:(pts[0][0]+(pts[1]?pts[1][0]:pts[0][1]||'')).toUpperCase(),
+            role:'delegate',badges:['first_login'],conferences:[],researchCount:0,
+            joinedAt:new Date().toISOString()
+          }));
+        }
+        window.location.href='dashboard.html';
+      }catch(e){showErr(e.message);}
+    };
 
-    window.togglePw = function() {
-      const input = document.getElementById('password');
-      input.type = input.type === 'password' ? 'text' : 'password';
-      document.querySelector('.toggle-pw').textContent = input.type === 'password' ? '👁' : '🔒';
+    window.doForgot=async function(){
+      const email=document.getElementById('email').value.trim();
+      if(!email){showErr('Enter your email above first.');return;}
+      try{await auth.sendPasswordResetEmail(email);alert('Password reset email sent to '+email);}
+      catch(e){showErr(e.message);}
     };
   </script>
 </body>
