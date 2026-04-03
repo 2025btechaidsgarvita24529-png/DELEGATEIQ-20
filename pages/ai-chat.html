@@ -128,8 +128,6 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
 <script>
   // ── CONFIG ──
-  const GEMINI_API_KEY = 'AIzaSyDNQLTxeghCtIkg1aplQ_v3WDn4b_qTa3o'; // paste from aistudio.google.com
-  const GEMINI_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_API_KEY}`;
 
   const fc={apiKey:"AIzaSyCqNmnpQRg5uUYu4Pp_k0k90wNBmJxpuH0",authDomain:"delegate-iq-2025.firebaseapp.com",projectId:"delegate-iq-2025",storageBucket:"delegate-iq-2025.firebasestorage.app",messagingSenderId:"612696020579",appId:"1:612696020579:web:90255861a0d531f2580a56"};
   if(!firebase.apps.length) firebase.initializeApp(fc);
@@ -229,19 +227,34 @@ RESPONSE RULES - CRITICAL:
     }
   });
 
+  // ── CONFIG ──
+  const GEMINI_API_KEY = 'AIzaSyDNQLTxeghCtIkg1aplQ_v3WDn4b_qTa3o'; // paste from aistudio.google.com
+  const GEMINI_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_API_KEY}`;
+
   // ── GEMINI API CALL ──
-const res = await fetch('/api/gemini', {
-   method: 'POST',
+  async function callGemini(userMessage) {
+    chatHistory.push({ role: 'user', parts: [{ text: userMessage }] });
+
+    const body = {
+      system_instruction: { parts: [{ text: SYSTEM_PROMPT }] },
+      contents: chatHistory,
+      generationConfig: { maxOutputTokens: 1500, temperature: 0.7 }
+    };
+
+    const response = await fetch(GEMINI_URL, {
+      method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ prompt: userMessage, context: munContext })
+      body: JSON.stringify(body)
     });
-    const data = await res.json();
-    const reply = data.text; // AI response text
+
+    const data = await response.json();
+    if (data.error) throw new Error(data.error.message);
+    const reply = data.candidates[0].content.parts[0].text;
 
     // Keep last 10 turns
     if (chatHistory.length > 20) chatHistory = chatHistory.slice(-20);
     return reply;
-  
+  }
 
   // ── DEEPER EXPLANATION ──
   async function callGeminiDeeper(originalQ, originalA) {
