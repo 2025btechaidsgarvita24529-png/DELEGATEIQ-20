@@ -241,7 +241,7 @@ const res = await fetch('/api/gemini', {
     // Keep last 10 turns
     if (chatHistory.length > 20) chatHistory = chatHistory.slice(-20);
     return reply;
-  }
+  
 
   // ── DEEPER EXPLANATION ──
   async function callGeminiDeeper(originalQ, originalA) {
