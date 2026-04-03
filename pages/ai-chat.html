@@ -228,11 +228,16 @@ RESPONSE RULES - CRITICAL:
   });
 
   // ── CONFIG ──
-  const GEMINI_API_KEY = 'AIzaSyDNQLTxeghCtIkg1aplQ_v3WDn4b_qTa3o'; // paste from aistudio.google.com
+  const GEMINI_API_KEY = 'AIzaSyDNQLTxeghCtIkg1aplQ_v3WDn4b_qTa3o'; // Your Gemini API key
   const GEMINI_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_API_KEY}`;
 
   // ── GEMINI API CALL ──
   async function callGemini(userMessage) {
+    if (GEMINI_API_KEY === 'YOUR_GEMINI_API_KEY_HERE') {
+      // Mock response for demo
+      return `Thank you for your question: "${userMessage}". This is a demo response from DelegateIQ AI Assistant. To enable real AI responses, get your free Gemini API key from https://aistudio.google.com/app/apikey and replace 'YOUR_GEMINI_API_KEY_HERE' in the code with your actual key. The AI will then provide detailed MUN research, debate strategies, and country position analysis.`;
+    }
+
     chatHistory.push({ role: 'user', parts: [{ text: userMessage }] });
 
     const body = {
@@ -258,6 +263,11 @@ RESPONSE RULES - CRITICAL:
 
   // ── DEEPER EXPLANATION ──
   async function callGeminiDeeper(originalQ, originalA) {
+    if (GEMINI_API_KEY === 'YOUR_GEMINI_API_KEY_HERE') {
+      // Mock deeper explanation
+      return `Deeper analysis for: "${originalQ}". This demo provides expanded context on MUN topics, including historical background, key resolutions, and strategic advice. Get your own Gemini API key to enable full AI-powered responses.`;
+    }
+
     const body = {
       system_instruction: { parts: [{ text: SYSTEM_PROMPT }] },
       contents: [
@@ -311,10 +321,9 @@ RESPONSE RULES - CRITICAL:
 
     } catch(err) {
       document.getElementById('typingState').style.display = 'none';
-      const msg = GEMINI_API_KEY === 'YOUR_GEMINI_API_KEY_HERE'
-        ? 'Gemini API key not configured. Get your free key at aistudio.google.com and add it to ai-chat.html.'
-        : err.message.includes('400') ? 'Invalid request. Please try again.'
+      const msg = err.message.includes('400') ? 'Invalid request. Please try again.'
         : err.message.includes('429') ? 'Rate limit reached. Wait a moment and try again.'
+        : err.message.includes('500') ? 'Server error. Please try again later.'
         : 'Connection error. Check your internet and try again.';
       appendErrorMsg(msg);
     }
