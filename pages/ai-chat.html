@@ -128,13 +128,8 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
 <script>
   // ── CONFIG ──
-  // AI Config - using Groq (works without CORS issues on Vercel)
-  // To switch to Gemini: get key from aistudio.google.com and uncomment below
-  const USE_GROQ = true;
-  const GROQ_KEY = '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';
-  const GROQ_URL = 'https://api.groq.com/openai/v1/chat/completions';
-  // const GEMINI_API_KEY = 'YOUR_GEMINI_KEY'; 
-  // const GEMINI_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_API_KEY}`;
+  const GEMINI_API_KEY = 'AIzaSyDNQLTxeghCtIkg1aplQ_v3WDn4b_qTa3o'; // paste from aistudio.google.com
+  const GEMINI_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_API_KEY}`;
 
   const fc={apiKey:"AIzaSyCqNmnpQRg5uUYu4Pp_k0k90wNBmJxpuH0",authDomain:"delegate-iq-2025.firebaseapp.com",projectId:"delegate-iq-2025",storageBucket:"delegate-iq-2025.firebasestorage.app",messagingSenderId:"612696020579",appId:"1:612696020579:web:90255861a0d531f2580a56"};
   if(!firebase.apps.length) firebase.initializeApp(fc);
@@ -235,41 +230,40 @@ RESPONSE RULES - CRITICAL:
   });
 
   // ── GEMINI API CALL ──
-  async function callGemini(userMessage) {
-    // Using Groq - works reliably on Vercel without CORS issues
-    const msgs = chatHistory.concat([{ role: 'user', content: userMessage }]);
-    
-    const response = await fetch(GROQ_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + GROQ_KEY },
-      body: JSON.stringify({ model: 'llama-3.3-70b-versatile', max_tokens: 1500, messages: [{ role: 'system', content: SYSTEM_PROMPT }, ...msgs.map(m => ({ role: m.role === 'model' ? 'assistant' : m.role, content: m.content || (m.parts && m.parts[0].text) || '' }))] })
+const res = await fetch('/api/gemini', {
+   method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ prompt: userMessage, context: munContext })
     });
-    
-    const data = await response.json();
-    if (data.error) throw new Error(data.error.message);
-    
-    const reply = data.choices[0].message.content;
-    chatHistory.push({ role: 'user', content: userMessage });
-    chatHistory.push({ role: 'assistant', content: reply });
+    const data = await res.json();
+    const reply = data.text; // AI response text
+
+    // Keep last 10 turns
     if (chatHistory.length > 20) chatHistory = chatHistory.slice(-20);
     return reply;
   }
 
   // ── DEEPER EXPLANATION ──
   async function callGeminiDeeper(originalQ, originalA) {
-    const response = await fetch(GROQ_URL, {
+    const body = {
+      system_instruction: { parts: [{ text: SYSTEM_PROMPT }] },
+      contents: [
+        { role: 'user', parts: [{ text: originalQ }] },
+        { role: 'model', parts: [{ text: originalA }] },
+        { role: 'user', parts: [{ text: 'Go much deeper. Add: specific historical examples, timeline of key events, actual UN resolution numbers with dates, how different country blocs (Western, G77, BRICS, etc.) view this differently, and specific debate strategy tips for using this knowledge in committee.' }] }
+      ],
+      generationConfig: { maxOutputTokens: 1500, temperature: 0.7 }
+    };
+
+    const response = await fetch(GEMINI_URL, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + GROQ_KEY },
-      body: JSON.stringify({ model: 'llama-3.3-70b-versatile', max_tokens: 1500, messages: [
-        { role: 'system', content: SYSTEM_PROMPT },
-        { role: 'user', content: originalQ },
-        { role: 'assistant', content: originalA },
-        { role: 'user', content: 'Go much deeper. Add: specific historical examples, timeline of key events, actual UN resolution numbers with dates, how different country blocs (Western, G77, BRICS, etc.) view this differently, and specific debate strategy tips.' }
-      ]})
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body)
     });
+
     const data = await response.json();
     if (data.error) throw new Error(data.error.message);
-    return data.choices[0].message.content;
+    return data.candidates[0].content.parts[0].text;
   }
 
   // ── SEND ──
@@ -304,10 +298,11 @@ RESPONSE RULES - CRITICAL:
 
     } catch(err) {
       document.getElementById('typingState').style.display = 'none';
-      const msg = err.message.includes('401') ? 'API key error. Please contact support.'
-        : err.message.includes('429') ? 'Rate limit reached. Please wait a moment and try again.'
-        : err.message.includes('Failed to fetch') ? 'Network error. Please check your connection.'
-        : 'Error: ' + err.message;
+      const msg = GEMINI_API_KEY === 'YOUR_GEMINI_API_KEY_HERE'
+        ? 'Gemini API key not configured. Get your free key at aistudio.google.com and add it to ai-chat.html.'
+        : err.message.includes('400') ? 'Invalid request. Please try again.'
+        : err.message.includes('429') ? 'Rate limit reached. Wait a moment and try again.'
+        : 'Connection error. Check your internet and try again.';
       appendErrorMsg(msg);
     }
 
