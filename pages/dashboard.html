@@ -6,6 +6,16 @@
   <title>Dashboard — DelegateIQ</title>
   <link rel="stylesheet" href="../css/style.css"/>
   <style>
+    /* Fix content visibility */
+    .page-body { overflow-x: hidden; }
+    .dg { overflow: hidden; }
+    .ann-bo { font-size:12px;color:#4A6058;line-height:1.5;margin-bottom:3px;word-break:break-word; }
+    .dc-body { max-height:300px;overflow-y:auto; }
+    /* Ensure app-main doesn't overlap sidebar */
+    @media(min-width:769px){
+      .app-main { min-width: 0; overflow-x: hidden; }
+    }
+    
     .role-bar{display:flex;gap:3px;padding:3px;background:rgba(255,255,255,0.07);border-radius:8px;margin:6px 10px;}
     .rsw{flex:1;padding:5px 6px;border:none;border-radius:6px;font-size:11px;font-weight:600;font-family:inherit;cursor:pointer;color:rgba(255,255,255,0.42);background:transparent;transition:all 0.15s;}
     .rsw.on{background:rgba(255,255,255,0.13);color:#fff;}
@@ -479,7 +489,7 @@ function loadAnnouncements(){
     const cls=a.type==='deadline'?'dl':a.type==='event'?'ev':'';
     return '<div class="ann-i"><div class="ann-dot '+cls+'"></div><div>'+
       '<div class="ann-ti">'+esc(a.title)+'</div>'+
-      '<div class="ann-bo">'+esc(a.body.substring(0,70))+(a.body.length>70?'...':'')+'</div>'+
+      '<div class="ann-bo">'+esc(a.body.substring(0,120))+(a.body.length>120?'...':'')+'</div>'+
       '<div class="ann-me">'+new Date(a.date).toLocaleDateString('en-IN',{day:'numeric',month:'short'})+'</div>'+
     '</div></div>';
   }).join('');
